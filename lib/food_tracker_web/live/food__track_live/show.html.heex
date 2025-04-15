@@ -1,0 +1,28 @@
+<.header>
+  Food  track {@food__track.id}
+  <:subtitle>This is a food__track record from your database.</:subtitle>
+  <:actions>
+    <.link patch={~p"/food_tracks/#{@food__track}/show/edit"} phx-click={JS.push_focus()}>
+      <.button>Edit food__track</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.list>
+  <:item title="Name">{@food__track.name}</:item>
+  <:item title="Date">{@food__track.date}</:item>
+  <:item title="Time">{@food__track.time}</:item>
+</.list>
+
+<.back navigate={~p"/food_tracks"}>Back to food_tracks</.back>
+
+<.modal :if={@live_action == :edit} id="food__track-modal" show on_cancel={JS.patch(~p"/food_tracks/#{@food__track}")}>
+  <.live_component
+    module={FoodTrackerWeb.Food_TrackLive.FormComponent}
+    id={@food__track.id}
+    title={@page_title}
+    action={@live_action}
+    food__track={@food__track}
+    patch={~p"/food_tracks/#{@food__track}"}
+  />
+</.modal>

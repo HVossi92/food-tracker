@@ -17,7 +17,13 @@ defmodule FoodTrackerWeb.Router do
   scope "/", FoodTrackerWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    get "/", RootController, :index
+
+    live "/food_tracks", Food_TrackLive.Index, :index
+    live "/food_tracks/new", Food_TrackLive.Index, :new
+    live "/food_tracks/:id/edit", Food_TrackLive.Index, :edit
+    live "/food_tracks/:id", Food_TrackLive.Show, :show
+    live "/food_tracks/:id/show/edit", Food_TrackLive.Show, :edit
   end
 
   # Other scopes may use custom stacks.
