@@ -6,6 +6,7 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
+    socket = assign(socket, :food__track, %FoodTracker.Food_Tracking.Food_Track{})
     {:ok, stream(socket, :food_tracks, Food_Tracking.list_food_tracks())}
   end
 
@@ -29,7 +30,6 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
   defp apply_action(socket, :index, _params) do
     socket
     |> assign(:page_title, "Listing Food tracks")
-    |> assign(:food__track, nil)
   end
 
   @impl true

@@ -98,7 +98,14 @@ defmodule FoodTracker.Food_Tracking do
       %Ecto.Changeset{data: %Food_Track{}}
 
   """
-  def change_food__track(%Food_Track{} = food__track, attrs \\ %{}) do
+  def change_food__track(food__track, attrs \\ %{})
+
+  # Handle nil case
+  def change_food__track(nil, attrs) do
+    change_food__track(%Food_Track{}, attrs)
+  end
+
+  def change_food__track(%Food_Track{} = food__track, attrs) do
     Food_Track.changeset(food__track, attrs)
   end
 end

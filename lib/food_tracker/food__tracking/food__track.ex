@@ -4,8 +4,8 @@ defmodule FoodTracker.Food_Tracking.Food_Track do
 
   schema "food_tracks" do
     field :name, :string
-    field :date, :string
-    field :time, :string
+    field :date, :string, default: Date.utc_today() |> Date.to_string()
+    field :time, :string, default: Time.utc_now() |> Time.to_string() |> String.slice(0, 5)
 
     timestamps(type: :utc_datetime)
   end

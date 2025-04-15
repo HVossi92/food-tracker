@@ -9,7 +9,6 @@ defmodule FoodTrackerWeb.Food_TrackLive.FormComponent do
     <div>
       <.header>
         {@title}
-        <:subtitle>Use this form to manage food__track records in your database.</:subtitle>
       </.header>
 
       <.simple_form
@@ -32,6 +31,9 @@ defmodule FoodTrackerWeb.Food_TrackLive.FormComponent do
 
   @impl true
   def update(%{food__track: food__track} = assigns, socket) do
+    # Handle nil values by providing a default empty struct
+    food__track = food__track || %FoodTracker.Food_Tracking.Food_Track{}
+
     {:ok,
      socket
      |> assign(assigns)
