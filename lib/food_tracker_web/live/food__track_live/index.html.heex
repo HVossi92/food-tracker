@@ -124,10 +124,9 @@
       <:col :let={{_id, food__track}} label="Date">{food__track.date}</:col>
       <:col :let={{_id, food__track}} label="Time">{food__track.time}</:col>
       <:action :let={{_id, food__track}}>
-        <div class="sr-only">
-          <.link navigate={~p"/food_tracks/#{food__track}"}>Show</.link>
-        </div>
-        <.link patch={~p"/food_tracks/#{food__track}/edit"}>Edit</.link>
+        <.link patch={~p"/food_tracks/#{food__track}/show/edit"} phx-click={JS.push_focus()}>
+          <.button>Edit</.button>
+        </.link>
       </:action>
       <:action :let={{id, food__track}}>
         <.link

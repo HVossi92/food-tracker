@@ -50,7 +50,11 @@ defmodule FoodTrackerWeb.CoreComponents do
       data-cancel={JS.exec(@on_cancel, "phx-remove")}
       class="relative z-50 hidden"
     >
-      <div id={"#{@id}-bg"} class="bg-zinc-50/90 fixed inset-0 transition-opacity" aria-hidden="true" />
+      <div
+        id={"#{@id}-bg"}
+        class="bg-gray-900/80 dark:bg-black/80 fixed inset-0 transition-opacity"
+        aria-hidden="true"
+      />
       <div
         class="fixed inset-0 overflow-y-auto"
         aria-labelledby={"#{@id}-title"}
@@ -66,19 +70,19 @@ defmodule FoodTrackerWeb.CoreComponents do
               phx-window-keydown={JS.exec("data-cancel", to: "##{@id}")}
               phx-key="escape"
               phx-click-away={JS.exec("data-cancel", to: "##{@id}")}
-              class="shadow-zinc-700/10 ring-zinc-700/10 relative hidden rounded-2xl bg-white p-14 shadow-lg ring-1 transition"
+              class="relative hidden rounded-lg bg-white dark:bg-gray-800 p-8 shadow-lg ring-1 ring-gray-200 dark:ring-gray-700 transition"
             >
-              <div class="absolute top-6 right-5">
+              <div class="absolute top-4 right-4">
                 <button
                   phx-click={JS.exec("data-cancel", to: "##{@id}")}
                   type="button"
-                  class="-m-3 flex-none p-3 opacity-20 hover:opacity-40"
+                  class="rounded-md p-2 text-gray-400 hover:text-gray-500 dark:text-gray-500 dark:hover:text-gray-400 transition-colors"
                   aria-label={gettext("close")}
                 >
                   <.icon name="hero-x-mark-solid" class="h-5 w-5" />
                 </button>
               </div>
-              <div id={"#{@id}-content"}>
+              <div id={"#{@id}-content"} class="text-gray-900 dark:text-white">
                 {render_slot(@inner_block)}
               </div>
             </.focus_wrap>
@@ -385,7 +389,7 @@ defmodule FoodTrackerWeb.CoreComponents do
 
   def label(assigns) do
     ~H"""
-    <label for={@for} class="block text-sm font-semibold leading-6 text-zinc-800">
+    <label for={@for} class="block text-sm font-semibold leading-6 text-zinc-800 dark:text-white">
       {render_slot(@inner_block)}
     </label>
     """
@@ -398,7 +402,7 @@ defmodule FoodTrackerWeb.CoreComponents do
 
   def error(assigns) do
     ~H"""
-    <p class="mt-3 flex gap-3 text-sm leading-6 text-rose-600">
+    <p class="mt-3 flex gap-3 text-sm leading-6 text-rose-600 dark:text-rose-400">
       <.icon name="hero-exclamation-circle-mini" class="mt-0.5 h-5 w-5 flex-none" />
       {render_slot(@inner_block)}
     </p>
@@ -418,10 +422,10 @@ defmodule FoodTrackerWeb.CoreComponents do
     ~H"""
     <header class={[@actions != [] && "flex items-center justify-between gap-6", @class]}>
       <div>
-        <h1 class="text-lg font-semibold leading-8 text-zinc-800">
+        <h1 class="text-lg font-semibold leading-8 text-zinc-800 dark:text-white">
           {render_slot(@inner_block)}
         </h1>
-        <p :if={@subtitle != []} class="mt-2 text-sm leading-6 text-zinc-600">
+        <p :if={@subtitle != []} class="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-400">
           {render_slot(@subtitle)}
         </p>
       </div>
@@ -499,7 +503,7 @@ defmodule FoodTrackerWeb.CoreComponents do
                 ]}
               >
                 <div class="block py-4 pr-6">
-                  <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-zinc-50 sm:rounded-l-xl" />
+                  <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-zinc-50 dark:group-hover:bg-gray-700 sm:rounded-l-xl" />
                   <span class={["relative", i == 0 && "font-semibold "]}>
                     {render_slot(col, @row_item.(row))}
                   </span>
@@ -507,13 +511,13 @@ defmodule FoodTrackerWeb.CoreComponents do
               </td>
               <td
                 :if={@action != []}
-                class="px-6 py-4 whitespace-nowrap text-sm  relative w-14 p-0 text-sm font-medium text-gray-900 dark:text-white"
+                class="px-6 py-4 whitespace-nowrap text-sm relative w-14 p-0 text-sm font-medium text-gray-900 dark:text-white"
               >
                 <div class="relative whitespace-nowrap py-4 text-right text-sm font-medium">
-                  <span class="absolute -inset-y-px -right-4 left-0 group-hover:bg-zinc-50 sm:rounded-r-xl" />
+                  <span class="absolute -inset-y-px -right-4 left-0 group-hover:bg-zinc-50 dark:group-hover:bg-gray-700 sm:rounded-r-xl" />
                   <span
                     :for={action <- @action}
-                    class="relative ml-4 font-semibold leading-6 hover:text-zinc-700"
+                    class="relative ml-4 font-semibold leading-6 text-emerald-600 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300"
                   >
                     {render_slot(action, @row_item.(row))}
                   </span>
