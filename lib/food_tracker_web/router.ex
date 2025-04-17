@@ -24,6 +24,7 @@ defmodule FoodTrackerWeb.Router do
     live "/food_tracks/:id/edit", Food_TrackLive.Index, :edit
     live "/food_tracks/:id", Food_TrackLive.Show, :show
     live "/food_tracks/:id/show/edit", Food_TrackLive.Show, :edit
+    live "/monthly", MonthlyLive.Index, :index
   end
 
   # Other scopes may use custom stacks.

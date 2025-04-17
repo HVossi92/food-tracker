@@ -19,6 +19,23 @@ defmodule FoodTracker.Food_Tracking do
   """
   def list_food_tracks do
     Repo.all(Food_Track)
+    |> Enum.map(fn track ->
+      %{track | date: FoodTracker.Utils.year_month_day_to_day_month_year(track.date)}
+    end)
+  end
+
+  def list_food_tracks_on(date) do
+    IO.inspect(date)
+
+    if FoodTracker.Utils.is_valid_date_string?(date) do
+      from(track in Food_Track, where: track.date == ^date)
+      |> Repo.all()
+      |> Enum.map(fn track ->
+        %{track | date: FoodTracker.Utils.year_month_day_to_day_month_year(track.date)}
+      end)
+    else
+      {:error, "Invalid date format"}
+    end
   end
 
   @doc """

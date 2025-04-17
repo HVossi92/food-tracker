@@ -1,4 +1,4 @@
-defmodule FoodTrackerWeb.Food_TrackLive.Index do
+defmodule FoodTrackerWeb.MonthlyLive.Index do
   use FoodTrackerWeb, :live_view
 
   alias FoodTracker.Food_Tracking
