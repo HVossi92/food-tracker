@@ -1,28 +1,4 @@
 <header>
-  <%!-- <div class="flex items-center justify-between border-b border-zinc-100 py-3 text-sm">
-    <div class="flex items-center gap-4">
-      <a href="/">
-        <img src={~p"/images/logo.svg"} width="36" />
-      </a>
-      <p class="bg-brand/5 text-brand rounded-full px-2 font-medium leading-6">
-        v{Application.spec(:phoenix, :vsn)}
-      </p>
-    </div>
-    <div class="flex items-center gap-4 font-semibold leading-6 text-zinc-900">
-      <a href="https://twitter.com/elixirphoenix" class="hover:text-zinc-700">
-        @elixirphoenix
-      </a>
-      <a href="https://github.com/phoenixframework/phoenix" class="hover:text-zinc-700">
-        GitHub
-      </a>
-      <a
-        href="https://hexdocs.pm/phoenix/overview.html"
-        class="rounded-lg bg-zinc-100 px-2 py-1 hover:bg-zinc-200/80"
-      >
-        Get Started <span aria-hidden="true">&rarr;</span>
-      </a>
-    </div>
-  </div> --%>
   <nav class="bg-white dark:bg-gray-800 shadow-md">
     <div class="container mx-auto px-4 py-3">
       <div class="flex items-center justify-between">
@@ -31,18 +7,33 @@
             Munch Metrics
           </a>
           <div class="hidden md:flex space-x-4">
-            <a
-              href="/"
-              class="py-2 px-3 bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300 rounded-md"
-            >
-              Tracking
-            </a>
-            <a
-              href="monthly.html"
-              class="py-2 px-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
-            >
-              Monthly View
-            </a>
+            <%= if @socket.view == FoodTrackerWeb.Food_TrackLive.Index do %>
+              <a
+                href="/"
+                class="py-2 px-3 bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300 rounded-md"
+              >
+                Tracking
+              </a>
+              <a
+                href="/monthly"
+                class="py-2 px-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
+              >
+                Monthly View
+              </a>
+            <% else %>
+              <a
+                href="/"
+                class="py-2 px-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
+              >
+                Tracking
+              </a>
+              <a
+                href="/monthly"
+                class="py-2 px-3 bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300 rounded-md"
+              >
+                Monthly View
+              </a>
+            <% end %>
           </div>
         </div>
         <div class="flex items-center space-x-2">

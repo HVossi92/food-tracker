@@ -20,6 +20,32 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
 
   @impl true
   def handle_params(params, _url, socket) do
+    socket =
+      case params do
+        %{"date" => date} ->
+          # If a date is provided in URL params, update the view with that date
+          date_string =
+            if FoodTracker.Utils.is_valid_date_string?(date) do
+              date
+            else
+              # Try converting from day.month.year format
+              try do
+                date = FoodTracker.Utils.string_to_date(date)
+                Utils.date_to_ymd_string(date)
+              rescue
+                _ -> Date.utc_today() |> Utils.date_to_ymd_string()
+              end
+            end
+
+          socket
+          |> assign(:date, Utils.year_month_day_to_day_month_year(date_string))
+          |> stream(:food_tracks, [], reset: true)
+          |> stream(:food_tracks, Food_Tracking.list_food_tracks_on(date_string))
+
+        _ ->
+          socket
+      end
+
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   end
 

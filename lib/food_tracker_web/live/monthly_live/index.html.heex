@@ -37,13 +37,10 @@
   </style>
 </head>
 <div class="bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-200 flex flex-col">
-  <!-- Navigation Bar -->
-
   <div class="flex-grow">
     <div class="container mx-auto px-4 py-8 max-w-6xl">
       <header class="mb-8">
         <h1 class="text-3xl font-bold text-gray-800 dark:text-white mb-2">Monthly Overview</h1>
-        <p class="text-gray-600 dark:text-gray-400">Food tracking summary for April 2025</p>
       </header>
       
 <!-- Month Navigation -->
@@ -51,6 +48,7 @@
         <div class="flex items-center justify-between">
           <a
             href="#"
+            phx-click="previous_month"
             class="text-emerald-600 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300"
           >
             <span class="sr-only">Previous month</span>
@@ -71,16 +69,35 @@
           </a>
 
           <div class="text-center">
-            <h2 class="text-xl font-semibold text-gray-800 dark:text-white">April 2025</h2>
-            <div class="flex space-x-1 mt-2 justify-center">
-              <a href="index.html" class="px-2 py-1 rounded bg-emerald-600 text-white text-xs">
-                Back to Daily View
-              </a>
+            <div class="flex items-center justify-center space-x-3">
+              <h2 class="text-xl font-semibold text-gray-800 dark:text-white">
+                {@month_name} {@current_month.year}
+              </h2>
+              <div class="flex space-x-2">
+                <a
+                  :if={@today.month == @current_month.month && @today.year == @current_month.year}
+                  href="#"
+                  class="px-2 py-1 rounded text-white text-xs bg-gray-600"
+                >
+                  Today
+                </a>
+                <button
+                  :if={@today.month != @current_month.month || @today.year != @current_month.year}
+                  phx-click="jump_to_today"
+                  class="px-2 py-1 rounded text-white text-xs bg-emerald-600"
+                >
+                  Jump to Today
+                </button>
+                <a href="/food_tracks" class="px-2 py-1 rounded bg-emerald-600 text-white text-xs">
+                  Daily View
+                </a>
+              </div>
             </div>
           </div>
 
           <a
             href="#"
+            phx-click="next_month"
             class="text-emerald-600 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300"
           >
             <span class="sr-only">Next month</span>
@@ -114,365 +131,84 @@
           <div class="text-sm font-medium text-gray-500 dark:text-gray-400 p-2">Saturday</div>
         </div>
         <div class="grid grid-cols-7 gap-2">
-          <!-- Previous month -->
-          <div class="h-28 flex flex-col p-2 text-gray-400 dark:text-gray-500 text-sm">
-            <span class="mb-1">30</span>
-          </div>
-          <div class="h-28 flex flex-col p-2 text-gray-400 dark:text-gray-500 text-sm">
-            <span class="mb-1">31</span>
-          </div>
+          <% first_day = Date.new!(@current_month.year, @current_month.month, 1)
+          last_day = Date.end_of_month(first_day)
+
+          # Calculate the number of padding days from the previous month
+          # Adjust to make Sunday = 0
+          padding_start = rem(Date.day_of_week(first_day) + 5, 7)
+
+          # Previous month days (for padding)
+          prev_month_date = Date.add(first_day, -1)
+          prev_month_last_day = prev_month_date.day
+
+          # Calculate days to show from the previous month
+          prev_month_days =
+            for pad <- (padding_start - 1)..0, pad >= 0 do
+              prev_month_last_day - pad
+            end
+
+          # Calculate days to show from the next month
+          days_shown = padding_start + last_day.day
+          # Always show 6 weeks (42 days)
+          padding_end = 42 - days_shown
+
+          # Generate next month days (for padding)
+          next_month_days =
+            for day <- 1..padding_end do
+              day
+            end %>
           
-<!-- Current month -->
-          <a
-            href="#"
-            class="h-28 flex flex-col p-2 text-gray-700 dark:text-gray-300 text-sm bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 overflow-hidden tooltip"
-          >
-            <span class="font-medium mb-1">1</span>
-            <div class="text-xs text-gray-600 dark:text-gray-400 space-y-1">
-              <div>Oatmeal</div>
-              <div>Coffee</div>
-              <div>Chicken Salad</div>
+<!-- Previous month padding days -->
+          <%= for day <- prev_month_days do %>
+            <div class="h-28 flex flex-col p-2 text-gray-400 dark:text-gray-500 text-sm">
+              <span class="mb-1">{day}</span>
             </div>
-            <span class="tooltip-text">
-              Oatmeal<br /> Coffee<br /> Chicken Salad<br />
-            </span>
-          </a>
-
-          <a
-            href="#"
-            class="h-28 flex flex-col p-2 text-gray-700 dark:text-gray-300 text-sm bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 overflow-hidden tooltip"
-          >
-            <span class="font-medium mb-1">2</span>
-            <div class="text-xs text-gray-600 dark:text-gray-400 space-y-1">
-              <div>Yogurt</div>
-              <div>Sandwich</div>
-              <div>Pasta</div>
-              <div>Tea</div>
-            </div>
-            <span class="tooltip-text">
-              Yogurt<br /> Sandwich<br /> Pasta<br /> Tea
-            </span>
-          </a>
-
-          <a
-            href="#"
-            class="h-28 flex flex-col p-2 text-gray-700 dark:text-gray-300 text-sm bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 overflow-hidden tooltip"
-          >
-            <span class="font-medium mb-1">3</span>
-            <div class="text-xs text-gray-600 dark:text-gray-400 space-y-1">
-              <div>Cereal</div>
-              <div>Coffee</div>
-              <div>Burger</div>
-              <div>Salad</div>
-              <div>...</div>
-            </div>
-            <span class="tooltip-text">
-              Cereal<br /> Coffee<br /> Burger<br /> Salad<br /> Ice Cream
-            </span>
-          </a>
-
-          <a
-            href="#"
-            class="h-28 flex flex-col p-2 text-gray-700 dark:text-gray-300 text-sm bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 overflow-hidden tooltip"
-          >
-            <span class="font-medium mb-1">4</span>
-            <div class="text-xs text-gray-600 dark:text-gray-400 space-y-1">
-              <div>Toast</div>
-              <div>Coffee</div>
-              <div>Soup</div>
-            </div>
-            <span class="tooltip-text">
-              Toast<br /> Coffee<br /> Soup
-            </span>
-          </a>
-
-          <a
-            href="#"
-            class="h-28 flex flex-col p-2 text-gray-700 dark:text-gray-300 text-sm bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 overflow-hidden tooltip"
-          >
-            <span class="font-medium mb-1">5</span>
-            <div class="text-xs text-gray-600 dark:text-gray-400 space-y-1">
-              <div>Pancakes</div>
-              <div>Juice</div>
-            </div>
-            <span class="tooltip-text">
-              Pancakes<br /> Juice
-            </span>
-          </a>
-
-          <a
-            href="#"
-            class="h-28 flex flex-col p-2 text-gray-700 dark:text-gray-300 text-sm bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 overflow-hidden tooltip"
-          >
-            <span class="font-medium mb-1">6</span>
-            <div class="text-xs text-gray-600 dark:text-gray-400 space-y-1">
-              <div>Oatmeal</div>
-              <div>Coffee</div>
-              <div>Sandwich</div>
-              <div>...</div>
-            </div>
-            <span class="tooltip-text">
-              Oatmeal<br /> Coffee<br /> Sandwich<br /> Steak
-            </span>
-          </a>
-
-          <a
-            href="#"
-            class="h-28 flex flex-col p-2 text-gray-700 dark:text-gray-300 text-sm bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 overflow-hidden tooltip"
-          >
-            <span class="font-medium mb-1">7</span>
-            <div class="text-xs text-gray-600 dark:text-gray-400 space-y-1">
-              <div>Eggs</div>
-              <div>Toast</div>
-              <div>Salad</div>
-            </div>
-            <span class="tooltip-text">
-              Eggs<br /> Toast<br /> Salad
-            </span>
-          </a>
-
-          <a
-            href="#"
-            class="h-28 flex flex-col p-2 text-gray-700 dark:text-gray-300 text-sm bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 overflow-hidden tooltip"
-          >
-            <span class="font-medium mb-1">8</span>
-            <div class="text-xs text-gray-600 dark:text-gray-400 space-y-1">
-              <div>Yogurt</div>
-              <div>Granola</div>
-              <div>Chicken</div>
-              <div>...</div>
-            </div>
-            <span class="tooltip-text">
-              Yogurt<br /> Granola<br /> Chicken<br /> Rice<br /> Ice Cream
-            </span>
-          </a>
-
-          <a
-            href="#"
-            class="h-28 flex flex-col p-2 text-gray-700 dark:text-gray-300 text-sm bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 overflow-hidden tooltip"
-          >
-            <span class="font-medium mb-1">9</span>
-            <div class="text-xs text-gray-600 dark:text-gray-400 space-y-1">
-              <div>Cereal</div>
-              <div>Milk</div>
-              <div>Sandwich</div>
-              <div>...</div>
-            </div>
-            <span class="tooltip-text">
-              Cereal<br /> Milk<br /> Sandwich<br /> Pasta
-            </span>
-          </a>
-
-          <a
-            href="#"
-            class="h-28 flex flex-col p-2 text-gray-700 dark:text-gray-300 text-sm bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 overflow-hidden tooltip"
-          >
-            <span class="font-medium mb-1">10</span>
-            <div class="text-xs text-gray-600 dark:text-gray-400 space-y-1">
-              <div>Toast</div>
-              <div>Coffee</div>
-              <div>Soup</div>
-            </div>
-            <span class="tooltip-text">
-              Toast<br /> Coffee<br /> Soup
-            </span>
-          </a>
-
-          <a
-            href="#"
-            class="h-28 flex flex-col p-2 text-gray-700 dark:text-gray-300 text-sm bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 overflow-hidden tooltip"
-          >
-            <span class="font-medium mb-1">11</span>
-            <div class="text-xs text-gray-600 dark:text-gray-400 space-y-1">
-              <div>Oatmeal</div>
-              <div>Coffee</div>
-              <div>Salad</div>
-              <div>...</div>
-            </div>
-            <span class="tooltip-text">
-              Oatmeal<br /> Coffee<br /> Salad<br /> Fish
-            </span>
-          </a>
-
-          <a
-            href="#"
-            class="h-28 flex flex-col p-2 text-gray-700 dark:text-gray-300 text-sm bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 overflow-hidden tooltip"
-          >
-            <span class="font-medium mb-1">12</span>
-            <div class="text-xs text-gray-600 dark:text-gray-400 space-y-1">
-              <div>Pancakes</div>
-              <div>Juice</div>
-              <div>Burger</div>
-              <div>...</div>
-            </div>
-            <span class="tooltip-text">
-              Pancakes<br /> Juice<br /> Burger<br /> Fries<br /> Ice Cream
-            </span>
-          </a>
-
-          <a
-            href="#"
-            class="h-28 flex flex-col p-2 text-gray-700 dark:text-gray-300 text-sm bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 overflow-hidden tooltip"
-          >
-            <span class="font-medium mb-1">13</span>
-            <div class="text-xs text-gray-600 dark:text-gray-400 space-y-1">
-              <div>Yogurt</div>
-              <div>Granola</div>
-              <div>Sandwich</div>
-            </div>
-            <span class="tooltip-text">
-              Yogurt<br /> Granola<br /> Sandwich
-            </span>
-          </a>
-
-          <a
-            href="#"
-            class="h-28 flex flex-col p-2 text-gray-700 dark:text-gray-300 text-sm bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 overflow-hidden tooltip"
-          >
-            <span class="font-medium mb-1">14</span>
-            <div class="text-xs text-gray-600 dark:text-gray-400 space-y-1">
-              <div>Cereal</div>
-              <div>Milk</div>
-              <div>Pasta</div>
-              <div>...</div>
-            </div>
-            <span class="tooltip-text">
-              Cereal<br /> Milk<br /> Pasta<br /> Garlic Bread
-            </span>
-          </a>
-
-          <a
-            href="index.html"
-            class="h-28 flex flex-col p-2 text-gray-700 dark:text-gray-300 text-sm bg-emerald-100 dark:bg-emerald-900 rounded-md border-2 border-emerald-500 overflow-hidden tooltip"
-          >
-            <span class="font-medium mb-1">15</span>
-            <div class="text-xs text-gray-600 dark:text-gray-400 space-y-1">
-              <div>Oatmeal</div>
-              <div>Coffee</div>
-              <div>Chicken Salad</div>
-              <div>Salmon</div>
-            </div>
-            <span class="tooltip-text">
-              Oatmeal with Berries<br /> Coffee with Milk<br /> Chicken Salad<br />
-              Salmon with Vegetables
-            </span>
-          </a>
-
-          <a
-            href="#"
-            class="h-28 flex flex-col p-2 text-gray-700 dark:text-gray-300 text-sm bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 overflow-hidden"
-          >
-            <span class="font-medium mb-1">16</span>
-          </a>
-
-          <a
-            href="#"
-            class="h-28 flex flex-col p-2 text-gray-700 dark:text-gray-300 text-sm bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 overflow-hidden"
-          >
-            <span class="font-medium mb-1">17</span>
-          </a>
-
-          <a
-            href="#"
-            class="h-28 flex flex-col p-2 text-gray-700 dark:text-gray-300 text-sm bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 overflow-hidden"
-          >
-            <span class="font-medium mb-1">18</span>
-          </a>
-
-          <a
-            href="#"
-            class="h-28 flex flex-col p-2 text-gray-700 dark:text-gray-300 text-sm bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 overflow-hidden"
-          >
-            <span class="font-medium mb-1">19</span>
-          </a>
-
-          <a
-            href="#"
-            class="h-28 flex flex-col p-2 text-gray-700 dark:text-gray-300 text-sm bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 overflow-hidden"
-          >
-            <span class="font-medium mb-1">20</span>
-          </a>
-
-          <a
-            href="#"
-            class="h-28 flex flex-col p-2 text-gray-700 dark:text-gray-300 text-sm bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 overflow-hidden"
-          >
-            <span class="font-medium mb-1">21</span>
-          </a>
-
-          <a
-            href="#"
-            class="h-28 flex flex-col p-2 text-gray-700 dark:text-gray-300 text-sm bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 overflow-hidden"
-          >
-            <span class="font-medium mb-1">22</span>
-          </a>
-
-          <a
-            href="#"
-            class="h-28 flex flex-col p-2 text-gray-700 dark:text-gray-300 text-sm bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 overflow-hidden"
-          >
-            <span class="font-medium mb-1">23</span>
-          </a>
-
-          <a
-            href="#"
-            class="h-28 flex flex-col p-2 text-gray-700 dark:text-gray-300 text-sm bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 overflow-hidden"
-          >
-            <span class="font-medium mb-1">24</span>
-          </a>
-
-          <a
-            href="#"
-            class="h-28 flex flex-col p-2 text-gray-700 dark:text-gray-300 text-sm bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 overflow-hidden"
-          >
-            <span class="font-medium mb-1">25</span>
-          </a>
-
-          <a
-            href="#"
-            class="h-28 flex flex-col p-2 text-gray-700 dark:text-gray-300 text-sm bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 overflow-hidden"
-          >
-            <span class="font-medium mb-1">26</span>
-          </a>
-
-          <a
-            href="#"
-            class="h-28 flex flex-col p-2 text-gray-700 dark:text-gray-300 text-sm bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 overflow-hidden"
-          >
-            <span class="font-medium mb-1">27</span>
-          </a>
-
-          <a
-            href="#"
-            class="h-28 flex flex-col p-2 text-gray-700 dark:text-gray-300 text-sm bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 overflow-hidden"
-          >
-            <span class="font-medium mb-1">28</span>
-          </a>
-
-          <a
-            href="#"
-            class="h-28 flex flex-col p-2 text-gray-700 dark:text-gray-300 text-sm bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 overflow-hidden"
-          >
-            <span class="font-medium mb-1">29</span>
-          </a>
-
-          <a
-            href="#"
-            class="h-28 flex flex-col p-2 text-gray-700 dark:text-gray-300 text-sm bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 overflow-hidden"
-          >
-            <span class="font-medium mb-1">30</span>
-          </a>
+          <% end %>
           
-<!-- Next month -->
-          <div class="h-28 flex flex-col p-2 text-gray-400 dark:text-gray-500 text-sm">
-            <span class="mb-1">1</span>
-          </div>
-          <div class="h-28 flex flex-col p-2 text-gray-400 dark:text-gray-500 text-sm">
-            <span class="mb-1">2</span>
-          </div>
-          <div class="h-28 flex flex-col p-2 text-gray-400 dark:text-gray-500 text-sm">
-            <span class="mb-1">3</span>
-          </div>
+<!-- Current month days -->
+          <%= for day <- 1..last_day.day do %>
+            <% current_date = Date.new!(@current_month.year, @current_month.month, day)
+            is_today = Date.compare(current_date, @today) == :eq
+            day_tracks = Map.get(@food_tracks, day, [])
+            has_tracks = length(day_tracks) > 0
+
+            # Determine the CSS class based on whether it's today
+            day_class =
+              cond do
+                is_today -> "bg-emerald-100 dark:bg-emerald-900 border-2 border-emerald-500"
+                has_tracks -> "bg-gray-100 dark:bg-gray-700"
+                true -> "bg-gray-50 dark:bg-gray-800"
+              end %>
+            <a
+              href={"/food_tracks?date=#{day}.#{@current_month.month}.#{@current_month.year}"}
+              class={"h-28 flex flex-col p-2 text-gray-700 dark:text-gray-300 text-sm #{day_class} rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 overflow-hidden tooltip"}
+            >
+              <span class="font-medium mb-1">{day}</span>
+              <div class="text-xs text-gray-600 dark:text-gray-400 space-y-1">
+                <%= for track <- Enum.take(day_tracks, 3) do %>
+                  <div>{track.name}</div>
+                <% end %>
+                <%= if length(day_tracks) > 3 do %>
+                  <div>...</div>
+                <% end %>
+              </div>
+              <%= if has_tracks do %>
+                <span class="tooltip-text">
+                  <%= for track <- day_tracks do %>
+                    {track.name}<br />
+                  <% end %>
+                </span>
+              <% end %>
+            </a>
+          <% end %>
+          
+<!-- Next month padding days -->
+          <%= for day <- next_month_days do %>
+            <div class="h-28 flex flex-col p-2 text-gray-400 dark:text-gray-500 text-sm">
+              <span class="mb-1">{day}</span>
+            </div>
+          <% end %>
         </div>
       </div>
     </div>
