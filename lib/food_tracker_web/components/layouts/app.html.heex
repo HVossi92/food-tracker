@@ -3,49 +3,71 @@
     <div class="container mx-auto px-4 py-3">
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-4">
-          <a href="/" class="text-emerald-600 dark:text-emerald-400 font-bold text-xl">
+          <.link href="/" class="text-emerald-600 dark:text-emerald-400 font-bold text-xl">
             Munch Metrics
-          </a>
+          </.link>
           <div class="hidden md:flex space-x-4">
             <%= if @socket.view == FoodTrackerWeb.Food_TrackLive.Index do %>
-              <a
+              <.link
                 href="/"
                 class="py-2 px-3 bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300 rounded-md"
               >
                 Tracking
-              </a>
-              <a
+              </.link>
+              <.link
                 href="/monthly"
                 class="py-2 px-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
               >
                 Monthly View
-              </a>
+              </.link>
             <% else %>
-              <a
+              <.link
                 href="/"
                 class="py-2 px-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
               >
                 Tracking
-              </a>
-              <a
+              </.link>
+              <.link
                 href="/monthly"
                 class="py-2 px-3 bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300 rounded-md"
               >
                 Monthly View
-              </a>
+              </.link>
             <% end %>
           </div>
         </div>
         <div class="flex items-center space-x-2">
-          <a
-            href="#"
-            class="py-2 px-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
-          >
-            Login
-          </a>
-          <a href="#" class="py-2 px-3 bg-emerald-600 text-white rounded-md hover:bg-emerald-700">
-            Register
-          </a>
+          <%= if assigns[:current_user] do %>
+            <div class="text-gray-700 dark:text-gray-300 mr-2">
+              {@current_user.email}
+            </div>
+            <.link
+              href={~p"/users/settings"}
+              class="py-2 px-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
+            >
+              Settings
+            </.link>
+            <.link
+              href={~p"/users/log_out"}
+              method="delete"
+              class="py-2 px-3 bg-red-600 text-white rounded-md hover:bg-red-700"
+            >
+              Log out
+            </.link>
+          <% else %>
+            <.link
+              href={~p"/users/log_in"}
+              class="py-2 px-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
+            >
+              Login
+            </.link>
+            <.link
+              href={~p"/users/register"}
+              class="py-2 px-3 bg-emerald-600 text-white rounded-md hover:bg-emerald-700"
+            >
+              Register
+            </.link>
+          <% end %>
           <a
             href="https://github.com/HVossi92/food-tracker"
             class="p-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
