@@ -88,6 +88,7 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
     socket =
       socket
       |> assign(:date, Utils.date_to_dmy_string(new_date))
+      |> assign(:food__track, %FoodTracker.Food_Tracking.Food_Track{date: new_date_string})
       |> stream(:food_tracks, [], reset: true)
       |> stream(:food_tracks, Food_Tracking.list_food_tracks_on(new_date_string))
 
@@ -101,6 +102,7 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
     socket =
       socket
       |> assign(:date, Utils.date_to_dmy_string(new_date))
+      |> assign(:food__track, %FoodTracker.Food_Tracking.Food_Track{date: new_date_string})
       |> stream(:food_tracks, [], reset: true)
       |> stream(:food_tracks, Food_Tracking.list_food_tracks_on(new_date_string))
 
@@ -116,6 +118,7 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
     socket =
       socket
       |> assign(:date, Utils.date_to_dmy_string(new_date))
+      |> assign(:food__track, %FoodTracker.Food_Tracking.Food_Track{date: new_date_string})
       |> stream(:food_tracks, [], reset: true)
       |> stream(:food_tracks, Food_Tracking.list_food_tracks_on(new_date_string))
 

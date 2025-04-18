@@ -88,9 +88,6 @@
                 >
                   Jump to Today
                 </button>
-                <a href="/food_tracks" class="px-2 py-1 rounded bg-emerald-600 text-white text-xs">
-                  Daily View
-                </a>
               </div>
             </div>
           </div>
@@ -180,8 +177,8 @@
                 has_tracks -> "bg-gray-100 dark:bg-gray-700"
                 true -> "bg-gray-50 dark:bg-gray-800"
               end %>
-            <a
-              href={"/food_tracks?date=#{day}.#{@current_month.month}.#{@current_month.year}"}
+            <div
+              title={day_tracks |> Enum.map(fn track -> track.name end) |> Enum.join(", ")}
               class={"h-28 flex flex-col p-2 text-gray-700 dark:text-gray-300 text-sm #{day_class} rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 overflow-hidden tooltip"}
             >
               <span class="font-medium mb-1">{day}</span>
@@ -200,7 +197,7 @@
                   <% end %>
                 </span>
               <% end %>
-            </a>
+            </div>
           <% end %>
           
 <!-- Next month padding days -->

@@ -37,9 +37,7 @@ defmodule FoodTrackerWeb.Food_TrackLive.FormComponent do
     {:ok,
      socket
      |> assign(assigns)
-     |> assign_new(:form, fn ->
-       to_form(Food_Tracking.change_food__track(food__track))
-     end)}
+     |> assign(:form, to_form(Food_Tracking.change_food__track(food__track)))}
   end
 
   @impl true
