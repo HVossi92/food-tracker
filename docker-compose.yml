@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  food_tracker:
+    image: your_dockerhub_username/food_tracker:latest
+    environment:
+      - DATABASE_PATH=/app/food_tracker.db
+      - SECRET_KEY_BASE=fMVThkvZcbnWrvr6jinIm++oJukGiF3ML1/5OI7dUp4WMBR1cKlwKn99BYS661zX
+      - PHX_HOST=munchmetrics.duckdns.org
+      - PORT=4000
+      - PHX_SERVER=true
+    ports:
+      - '4000:4000'
+    volumes:
+      - food_tracker_data:/app/data
+    command: /bin/sh -c "/app/bin/migrate && /app/bin/server"
+
+volumes:
+  food_tracker_data:
