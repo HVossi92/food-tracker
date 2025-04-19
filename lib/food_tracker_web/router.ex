@@ -20,8 +20,6 @@ defmodule FoodTrackerWeb.Router do
   scope "/", FoodTrackerWeb do
     pipe_through :browser
 
-    # get "/", RootController, :index
-
     live_session :main,
       on_mount: [{FoodTrackerWeb.UserAuth, :ensure_authenticated}] do
       live "/", Food_TrackLive.Index, :index
@@ -92,5 +90,11 @@ defmodule FoodTrackerWeb.Router do
       live "/users/confirm/:token", UserConfirmationLive, :edit
       live "/users/confirm", UserConfirmationInstructionsLive, :new
     end
+  end
+
+  scope "/", FoodTrackerWeb do
+    pipe_through [:browser]
+    get "/privacy", PrivacyController, :index
+    get "/tos", TosController, :index
   end
 end

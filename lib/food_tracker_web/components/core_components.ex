@@ -234,7 +234,10 @@ defmodule FoodTrackerWeb.CoreComponents do
     ~H"""
     <button
       type={@type}
-      class="w-full bg-emerald-600 text-white py-2 px-4 rounded-md hover:bg-emerald-700 transition duration-200"
+      class={[
+        "w-full py-2 px-4 rounded-md transition duration-200 text-white",
+        @class || "bg-emerald-600 hover:bg-emerald-700"
+      ]}
       {@rest}
     >
       {render_slot(@inner_block)}

@@ -69,7 +69,26 @@ defmodule FoodTrackerWeb.UserSettingsLive do
           </:actions>
         </.simple_form>
       </div>
+      <div>
+        <.simple_form for={@email_form} id="delete_account_form" phx-submit="delete_account">
+          <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Delete Account</h3>
+          <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">
+            This action cannot be undone. All your data will be permanently deleted.
+          </p>
+          <:actions>
+            <button
+              type="submit"
+              class="w-full py-2 px-4 rounded-md transition duration-200 text-white bg-red-600 hover:bg-red-700"
+              data-confirm="Are you sure you want to delete your account? This action cannot be undone."
+              phx-disable-with="Deleting..."
+            >
+              Delete account
+            </button>
+          </:actions>
+        </.simple_form>
+      </div>
     </div>
+    <br />
     """
   end
 
@@ -162,6 +181,20 @@ defmodule FoodTrackerWeb.UserSettingsLive do
 
       {:error, changeset} ->
         {:noreply, assign(socket, password_form: to_form(changeset))}
+    end
+  end
+
+  def handle_event("delete_account", _, socket) do
+    case Accounts.delete_user(socket.assigns.current_user.id) do
+      {:ok, _user} ->
+        {:noreply,
+         socket |> put_flash(:info, "Account deleted successfully.") |> push_navigate(to: ~p"/")}
+
+      {:error, _changeset} ->
+        {:noreply,
+         socket
+         |> put_flash(:error, "Failed to delete account. Please try again.")
+         |> push_navigate(to: ~p"/users/settings")}
     end
   end
 end

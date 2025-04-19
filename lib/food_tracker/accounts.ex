@@ -350,4 +350,9 @@ defmodule FoodTracker.Accounts do
       {:error, :user, changeset, _} -> {:error, changeset}
     end
   end
+
+  def delete_user(user_id) do
+    user = Repo.get!(User, user_id)
+    Repo.delete(user)
+  end
 end
