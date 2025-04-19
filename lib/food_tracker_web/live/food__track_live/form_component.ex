@@ -51,6 +51,10 @@ defmodule FoodTrackerWeb.Food_TrackLive.FormComponent do
   end
 
   defp save_food__track(socket, :edit, food__track_params) do
+    # Ensure user_id can't be changed during edits
+    food__track_params =
+      Map.put(food__track_params, "user_id", socket.assigns.food__track.user_id)
+
     case Food_Tracking.update_food__track(socket.assigns.food__track, food__track_params) do
       {:ok, food__track} ->
         notify_parent({:saved, food__track})
@@ -66,6 +70,9 @@ defmodule FoodTrackerWeb.Food_TrackLive.FormComponent do
   end
 
   defp save_food__track(socket, :new, food__track_params) do
+    # Add the current user's ID to the food track params
+    food__track_params = Map.put(food__track_params, "user_id", socket.assigns.current_user.id)
+
     case Food_Tracking.create_food__track(food__track_params) do
       {:ok, food__track} ->
         notify_parent({:saved, food__track})

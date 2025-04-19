@@ -8,6 +8,8 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
   @impl true
   def mount(_params, _session, socket) do
     today = Date.utc_today() |> Utils.date_to_dmy_string()
+    today_ymd = Date.utc_today() |> Utils.date_to_ymd_string()
+    user_id = socket.assigns.current_user.id
 
     socket =
       socket
@@ -15,11 +17,13 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
       |> assign(:date, today)
       |> assign(:today, today)
 
-    {:ok, stream(socket, :food_tracks, Food_Tracking.list_food_tracks_on(today))}
+    {:ok, stream(socket, :food_tracks, Food_Tracking.list_food_tracks_on(today_ymd, user_id))}
   end
 
   @impl true
   def handle_params(params, _url, socket) do
+    user_id = socket.assigns.current_user.id
+
     socket =
       case params do
         %{"date" => date} ->
@@ -40,7 +44,7 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
           socket
           |> assign(:date, Utils.year_month_day_to_day_month_year(date_string))
           |> stream(:food_tracks, [], reset: true)
-          |> stream(:food_tracks, Food_Tracking.list_food_tracks_on(date_string))
+          |> stream(:food_tracks, Food_Tracking.list_food_tracks_on(date_string, user_id))
 
         _ ->
           socket
@@ -80,6 +84,7 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
   end
 
   def handle_event("previous_day", _, socket) do
+    user_id = socket.assigns.current_user.id
     current_date = socket.assigns.date
     current_date = FoodTracker.Utils.string_to_date(current_date)
     new_date = Date.add(current_date, -1)
@@ -90,12 +95,13 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
       |> assign(:date, Utils.date_to_dmy_string(new_date))
       |> assign(:food__track, %FoodTracker.Food_Tracking.Food_Track{date: new_date_string})
       |> stream(:food_tracks, [], reset: true)
-      |> stream(:food_tracks, Food_Tracking.list_food_tracks_on(new_date_string))
+      |> stream(:food_tracks, Food_Tracking.list_food_tracks_on(new_date_string, user_id))
 
     {:noreply, socket}
   end
 
   def handle_event("today", _, socket) do
+    user_id = socket.assigns.current_user.id
     new_date = Date.utc_today()
     new_date_string = Utils.date_to_ymd_string(new_date)
 
@@ -104,12 +110,13 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
       |> assign(:date, Utils.date_to_dmy_string(new_date))
       |> assign(:food__track, %FoodTracker.Food_Tracking.Food_Track{date: new_date_string})
       |> stream(:food_tracks, [], reset: true)
-      |> stream(:food_tracks, Food_Tracking.list_food_tracks_on(new_date_string))
+      |> stream(:food_tracks, Food_Tracking.list_food_tracks_on(new_date_string, user_id))
 
     {:noreply, socket}
   end
 
   def handle_event("next_day", _, socket) do
+    user_id = socket.assigns.current_user.id
     current_date = socket.assigns.date
     current_date = FoodTracker.Utils.string_to_date(current_date)
     new_date = Date.add(current_date, 1)
@@ -120,7 +127,7 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
       |> assign(:date, Utils.date_to_dmy_string(new_date))
       |> assign(:food__track, %FoodTracker.Food_Tracking.Food_Track{date: new_date_string})
       |> stream(:food_tracks, [], reset: true)
-      |> stream(:food_tracks, Food_Tracking.list_food_tracks_on(new_date_string))
+      |> stream(:food_tracks, Food_Tracking.list_food_tracks_on(new_date_string, user_id))
 
     {:noreply, socket}
   end

@@ -16,7 +16,14 @@ defmodule FoodTrackerWeb.MonthlyLive.Index do
       |> assign(:current_month, current_month)
       |> assign(:today, today)
       |> assign(:month_name, month_name(current_month.month))
-      |> assign(:food_tracks, get_month_food_tracks(current_month.month, current_month.year))
+      |> assign(
+        :food_tracks,
+        get_month_food_tracks(
+          current_month.month,
+          current_month.year,
+          socket.assigns.current_user.id
+        )
+      )
 
     {:ok, socket}
   end
@@ -64,7 +71,10 @@ defmodule FoodTrackerWeb.MonthlyLive.Index do
       socket
       |> assign(:current_month, %{month: month, year: year})
       |> assign(:month_name, month_name(month))
-      |> assign(:food_tracks, get_month_food_tracks(month, year))
+      |> assign(
+        :food_tracks,
+        get_month_food_tracks(month, year, socket.assigns.current_user.id)
+      )
 
     {:noreply, socket}
   end
@@ -77,7 +87,7 @@ defmodule FoodTrackerWeb.MonthlyLive.Index do
       socket
       |> assign(:current_month, %{month: month, year: year})
       |> assign(:month_name, month_name(month))
-      |> assign(:food_tracks, get_month_food_tracks(month, year))
+      |> assign(:food_tracks, get_month_food_tracks(month, year, socket.assigns.current_user.id))
 
     {:noreply, socket}
   end
@@ -94,7 +104,10 @@ defmodule FoodTrackerWeb.MonthlyLive.Index do
         socket
         |> assign(:current_month, %{month: today.month, year: today.year})
         |> assign(:month_name, month_name(today.month))
-        |> assign(:food_tracks, get_month_food_tracks(today.month, today.year))
+        |> assign(
+          :food_tracks,
+          get_month_food_tracks(today.month, today.year, socket.assigns.current_user.id)
+        )
 
       {:noreply, socket}
     end
@@ -102,10 +115,19 @@ defmodule FoodTrackerWeb.MonthlyLive.Index do
 
   defp update_food_tracks(socket) do
     current_month = socket.assigns.current_month
-    assign(socket, :food_tracks, get_month_food_tracks(current_month.month, current_month.year))
+
+    assign(
+      socket,
+      :food_tracks,
+      get_month_food_tracks(
+        current_month.month,
+        current_month.year,
+        socket.assigns.current_user.id
+      )
+    )
   end
 
-  defp get_month_food_tracks(month, year) do
+  defp get_month_food_tracks(month, year, user_id) do
     start_date = Date.new!(year, month, 1)
     end_date = Date.end_of_month(start_date)
 
@@ -115,7 +137,7 @@ defmodule FoodTrackerWeb.MonthlyLive.Index do
     date_range
     |> Enum.reduce(%{}, fn date, acc ->
       date_string = Utils.date_to_ymd_string(date)
-      tracks = Food_Tracking.list_food_tracks_on(date_string)
+      tracks = Food_Tracking.list_food_tracks_on(date_string, user_id)
       Map.put(acc, date.day, tracks)
     end)
   end

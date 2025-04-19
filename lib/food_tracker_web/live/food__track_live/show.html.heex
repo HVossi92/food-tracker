@@ -16,13 +16,19 @@
 
 <.back navigate={~p"/food_tracks"}>Back to food_tracks</.back>
 
-<.modal :if={@live_action == :edit} id="food__track-modal" show on_cancel={JS.patch(~p"/food_tracks/#{@food__track}")}>
+<.modal
+  :if={@live_action == :edit}
+  id="food__track-modal"
+  show
+  on_cancel={JS.patch(~p"/food_tracks/#{@food__track}")}
+>
   <.live_component
     module={FoodTrackerWeb.Food_TrackLive.FormComponent}
     id={@food__track.id}
     title={@page_title}
     action={@live_action}
     food__track={@food__track}
+    current_user={@current_user}
     patch={~p"/food_tracks/#{@food__track}"}
   />
 </.modal>

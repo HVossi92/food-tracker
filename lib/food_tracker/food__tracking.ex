@@ -17,19 +17,20 @@ defmodule FoodTracker.Food_Tracking do
       [%Food_Track{}, ...]
 
   """
-  def list_food_tracks do
-    Repo.all(Food_Track)
+  def list_food_tracks(user_id) do
+    query = from(track in Food_Track, where: track.user_id == ^user_id)
+
+    Repo.all(query)
     |> Enum.map(fn track ->
       %{track | date: FoodTracker.Utils.year_month_day_to_day_month_year(track.date)}
     end)
   end
 
-  def list_food_tracks_on(date) do
-    IO.inspect(date)
-
+  def list_food_tracks_on(date, user_id) do
     if FoodTracker.Utils.is_valid_date_string?(date) do
-      from(track in Food_Track, where: track.date == ^date)
-      |> Repo.all()
+      query = from(track in Food_Track, where: track.date == ^date and track.user_id == ^user_id)
+
+      Repo.all(query)
       |> Enum.map(fn track ->
         %{track | date: FoodTracker.Utils.year_month_day_to_day_month_year(track.date)}
       end)
