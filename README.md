@@ -1,18 +1,63 @@
-# FoodTracker
+# Munch Metrics
 
-To start your Phoenix server:
+A modern, real-time food tracking application built with Phoenix LiveView. Track your meals easily with a beautiful, responsive interface.
 
-  * Run `mix setup` to install and setup dependencies
-  * Start Phoenix endpoint with `mix phx.server` or inside IEx with `iex -S mix phx.server`
+Demo: https://munchmetrics.duckdns.org/
 
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
+<img src="screenshots/demo.png" alt="Munch Metrics Screenshot" width="600"/>
 
-Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
+## For Users
 
-## Learn more
+### Features
 
-  * Official website: https://www.phoenixframework.org/
-  * Guides: https://hexdocs.pm/phoenix/overview.html
-  * Docs: https://hexdocs.pm/phoenix
-  * Forum: https://elixirforum.com/c/phoenix-forum
-  * Source: https://github.com/phoenixframework/phoenix
+- Simple and intuitive food tracking
+- Daily tracking view for detailed meal logging
+- Monthly overview to visualize eating patterns
+- Dark mode support for comfortable viewing
+- Responsive design that works on all devices
+- Secure user authentication
+
+### Getting Started
+
+1. Create an account or log in
+2. Use the "Tracking" view for daily meal logging
+   - Add meals with name, date, and time
+3. Switch to "Monthly View" to see your eating patterns
+   - Navigate between months easily
+   - Today's date is highlighted for quick reference
+
+## For Developers
+
+### Tech Stack
+
+- **Framework**: Phoenix LiveView
+- **Language**: Elixir
+- **Database**: SQLite3
+- **Frontend**: Tailwind CSS
+- **Authentication**: Built-in Phoenix authentication
+
+### Prerequisites
+
+- Elixir 1.14 or later
+- Erlang/OTP 25 or later
+- SQLite3
+
+### Local Development Setup
+
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   mix setup
+   ```
+3. Start Phoenix server:
+   ```bash
+   mix phx.server
+   ```
+4. Visit [`localhost:4000`](http://localhost:4000) from your browser
+
+### Project Structure
+
+- `lib/food_tracker/food__tracking/` - Core food tracking context and schema
+- `lib/food_tracker_web/live/` - LiveView components and templates
+- `lib/food_tracker_web/components/` - Reusable UI components
+- `priv/repo/migrations/` - Database migrations
