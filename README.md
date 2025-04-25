@@ -1,10 +1,16 @@
 # Munch Metrics
 
-A modern, real-time food tracking application built with Phoenix LiveView. Track your meals easily with a beautiful, responsive interface.
+A modern, real-time food tracking application built with Phoenix LiveView. Track your meals easily with a responsive interface.
 
 Demo: https://munchmetrics.duckdns.org/
 
 <img src="screenshots/demo.png" alt="Munch Metrics Screenshot" width="600"/>
+
+## Todos
+
+[x] Make sure db is persistent when running new container
+[ ] Always default to the current date and time
+[ ] Fix Today's Food Log scroll bars / layout
 
 ## For Users
 
