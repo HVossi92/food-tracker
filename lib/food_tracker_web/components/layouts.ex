@@ -171,7 +171,7 @@ defmodule FoodTrackerWeb.Layouts do
     </header>
 
     <main>
-      <div class="mx-auto max-w-2xl">
+      <div class="mx-auto">
         <.flash_group flash={@flash} />
         {@inner_content}
       </div>

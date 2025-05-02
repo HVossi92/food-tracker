@@ -5,8 +5,8 @@ defmodule FoodTracker.Food_Tracking do
 
   import Ecto.Query, warn: false
   alias FoodTracker.Repo
-
   alias FoodTracker.Food_Tracking.Food_Track
+  alias FoodTracker.Services.OllamaService
 
   @doc """
   Returns the list of food_tracks.
@@ -68,6 +68,17 @@ defmodule FoodTracker.Food_Tracking do
 
   """
   def create_food__track(attrs \\ %{}) do
+    {execution_time, nutrition_info} =
+      :timer.tc(fn -> OllamaService.get_nutrition_info(attrs["name"]) end)
+
+    IO.puts("Nutrition info retrieval time: #{execution_time / 1_000_000} seconds")
+    IO.inspect(nutrition_info, label: "Nutrition information")
+
+    attrs = Map.put(attrs, "calories", nutrition_info[:calories])
+    attrs = Map.put(attrs, "protein", nutrition_info[:protein])
+
+    IO.inspect(attrs, label: "attrs")
+
     %Food_Track{}
     |> Food_Track.changeset(attrs)
     |> Repo.insert()

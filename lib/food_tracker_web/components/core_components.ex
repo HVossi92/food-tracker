@@ -473,7 +473,7 @@ defmodule FoodTrackerWeb.CoreComponents do
       <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-semibold text-gray-800 dark:text-white">Today's Food Log</h2>
       </div>
-      <div class="overflow-x-auto">
+      <div class="">
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead class="bg-gray-50 dark:bg-gray-700">
             <tr>
