@@ -13,7 +13,7 @@ config :food_tracker,
 
 # Configures the endpoint
 config :food_tracker, FoodTrackerWeb.Endpoint,
-  url: [host: "munchmetrics.duckdns.org"],
+  url: [host: "munchmetrics.vossihub.org"],
   adapter: Bandit.PhoenixAdapter,
   render_errors: [
     formats: [html: FoodTrackerWeb.ErrorHTML, json: FoodTrackerWeb.ErrorJSON],

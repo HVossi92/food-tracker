@@ -2,7 +2,7 @@
 
 A modern, real-time food tracking application built with Phoenix LiveView. Track your meals easily with a responsive interface.
 
-Demo: https://munchmetrics.duckdns.org/
+Demo: https://munchmetrics.vossihub.org/
 
 <img src="screenshots/demo.png" alt="Munch Metrics Screenshot" width="600"/>
 
