@@ -95,8 +95,6 @@ defmodule FoodTracker.Services.OllamaService do
   defp process_response({:ok, response_text}, _) do
     processed_value = TextProcessing.extract_numbers(response_text)
 
-    IO.puts(">>>>>>>> process_response result: #{processed_value}")
-
     if processed_value == -1.0 do
       {:error, "Ollama could not provide a numeric answer"}
     else

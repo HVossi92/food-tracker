@@ -12,7 +12,6 @@ defmodule FoodTracker.Services.TextProcessing do
   3. Parses the result as a float or returns -1.0 if parsing fails
   """
   def extract_numbers(text) do
-    IO.puts(">>>>>>>> extract_numbers")
     # Strip out everything between <think> and </think>
     text = Regex.replace(~r/<think>.*?<\/think>/s, text, "")
     # Keep only numbers and decimal points

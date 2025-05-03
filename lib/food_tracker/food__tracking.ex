@@ -19,6 +19,7 @@ defmodule FoodTracker.Food_Tracking do
 
   """
   def list_food_tracks(user_id) do
+    IO.puts("Listing food tracks for user: #{user_id}")
     query = from(track in Food_Track, where: track.user_id == ^user_id)
 
     Repo.all(query)
@@ -28,13 +29,24 @@ defmodule FoodTracker.Food_Tracking do
   end
 
   def list_food_tracks_on(date, user_id) do
+    IO.puts("Listing food tracks for user: #{user_id} on date: #{date}")
+
     if FoodTracker.Utils.is_valid_date_string?(date) do
       query = from(track in Food_Track, where: track.date == ^date and track.user_id == ^user_id)
 
-      Repo.all(query)
-      |> Enum.map(fn track ->
-        %{track | date: FoodTracker.Utils.year_month_day_to_day_month_year(track.date)}
-      end)
+      rows =
+        Repo.all(query)
+        |> Enum.map(fn track ->
+          %{track | date: FoodTracker.Utils.year_month_day_to_day_month_year(track.date)}
+        end)
+
+      {rows, total_calories, total_protein} =
+        rows
+        |> Enum.reduce({[], 0, 0}, fn row, {acc_rows, acc_calories, acc_protein} ->
+          {acc_rows ++ [row], acc_calories + row.calories, acc_protein + row.protein}
+        end)
+
+      %{food_tracks: rows, calories: total_calories, protein: total_protein}
     else
       {:error, "Invalid date format"}
     end

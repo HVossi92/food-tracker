@@ -17,7 +17,16 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
       |> assign(:date, today)
       |> assign(:today, today)
 
-    {:ok, stream(socket, :food_tracks, Food_Tracking.list_food_tracks_on(today_ymd, user_id))}
+    # Pattern match the return value to get food_tracks, calories, and protein
+    %{food_tracks: food_tracks, calories: total_calories, protein: total_protein} =
+      Food_Tracking.list_food_tracks_on(today_ymd, user_id)
+
+    socket =
+      socket
+      |> assign(:total_calories, total_calories)
+      |> assign(:total_protein, total_protein)
+
+    {:ok, stream(socket, :food_tracks, food_tracks)}
   end
 
   @impl true
@@ -41,10 +50,16 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
               end
             end
 
+          # Pattern match the return value to get food_tracks, calories, and protein
+          %{food_tracks: food_tracks, calories: total_calories, protein: total_protein} =
+            Food_Tracking.list_food_tracks_on(date_string, user_id)
+
           socket
           |> assign(:date, Utils.year_month_day_to_day_month_year(date_string))
+          |> assign(:total_calories, total_calories)
+          |> assign(:total_protein, total_protein)
           |> stream(:food_tracks, [], reset: true)
-          |> stream(:food_tracks, Food_Tracking.list_food_tracks_on(date_string, user_id))
+          |> stream(:food_tracks, food_tracks)
 
         _ ->
           socket
@@ -72,7 +87,21 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
 
   @impl true
   def handle_info({FoodTrackerWeb.Food_TrackLive.FormComponent, {:saved, food__track}}, socket) do
-    {:noreply, stream_insert(socket, :food_tracks, food__track)}
+    # After saving a new food track, refresh the daily totals
+    user_id = socket.assigns.current_user.id
+    date_string = food__track.date
+
+    # Get updated totals
+    %{food_tracks: food_tracks, calories: total_calories, protein: total_protein} =
+      Food_Tracking.list_food_tracks_on(date_string, user_id)
+
+    socket =
+      socket
+      |> assign(:total_calories, total_calories)
+      |> assign(:total_protein, total_protein)
+      |> stream_insert(:food_tracks, food__track)
+
+    {:noreply, socket}
   end
 
   @impl true
@@ -80,7 +109,22 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
     food__track = Food_Tracking.get_food__track!(id)
     {:ok, _} = Food_Tracking.delete_food__track(food__track)
 
-    {:noreply, stream_delete(socket, :food_tracks, food__track)}
+    # After deleting, refresh the daily totals
+    user_id = socket.assigns.current_user.id
+    current_date = socket.assigns.date
+    date_ymd = FoodTracker.Utils.string_to_date(current_date) |> Utils.date_to_ymd_string()
+
+    # Get updated totals
+    %{food_tracks: _, calories: total_calories, protein: total_protein} =
+      Food_Tracking.list_food_tracks_on(date_ymd, user_id)
+
+    socket =
+      socket
+      |> assign(:total_calories, total_calories)
+      |> assign(:total_protein, total_protein)
+      |> stream_delete(:food_tracks, food__track)
+
+    {:noreply, socket}
   end
 
   def handle_event("previous_day", _, socket) do
@@ -90,12 +134,18 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
     new_date = Date.add(current_date, -1)
     new_date_string = Utils.date_to_ymd_string(new_date)
 
+    # Pattern match the return value to get food_tracks, calories, and protein
+    %{food_tracks: food_tracks, calories: total_calories, protein: total_protein} =
+      Food_Tracking.list_food_tracks_on(new_date_string, user_id)
+
     socket =
       socket
       |> assign(:date, Utils.date_to_dmy_string(new_date))
       |> assign(:food__track, %FoodTracker.Food_Tracking.Food_Track{date: new_date_string})
+      |> assign(:total_calories, total_calories)
+      |> assign(:total_protein, total_protein)
       |> stream(:food_tracks, [], reset: true)
-      |> stream(:food_tracks, Food_Tracking.list_food_tracks_on(new_date_string, user_id))
+      |> stream(:food_tracks, food_tracks)
 
     {:noreply, socket}
   end
@@ -105,12 +155,18 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
     new_date = Date.utc_today()
     new_date_string = Utils.date_to_ymd_string(new_date)
 
+    # Pattern match the return value to get food_tracks, calories, and protein
+    %{food_tracks: food_tracks, calories: total_calories, protein: total_protein} =
+      Food_Tracking.list_food_tracks_on(new_date_string, user_id)
+
     socket =
       socket
       |> assign(:date, Utils.date_to_dmy_string(new_date))
       |> assign(:food__track, %FoodTracker.Food_Tracking.Food_Track{date: new_date_string})
+      |> assign(:total_calories, total_calories)
+      |> assign(:total_protein, total_protein)
       |> stream(:food_tracks, [], reset: true)
-      |> stream(:food_tracks, Food_Tracking.list_food_tracks_on(new_date_string, user_id))
+      |> stream(:food_tracks, food_tracks)
 
     {:noreply, socket}
   end
@@ -122,12 +178,18 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
     new_date = Date.add(current_date, 1)
     new_date_string = Utils.date_to_ymd_string(new_date)
 
+    # Pattern match the return value to get food_tracks, calories, and protein
+    %{food_tracks: food_tracks, calories: total_calories, protein: total_protein} =
+      Food_Tracking.list_food_tracks_on(new_date_string, user_id)
+
     socket =
       socket
       |> assign(:date, Utils.date_to_dmy_string(new_date))
       |> assign(:food__track, %FoodTracker.Food_Tracking.Food_Track{date: new_date_string})
+      |> assign(:total_calories, total_calories)
+      |> assign(:total_protein, total_protein)
       |> stream(:food_tracks, [], reset: true)
-      |> stream(:food_tracks, Food_Tracking.list_food_tracks_on(new_date_string, user_id))
+      |> stream(:food_tracks, food_tracks)
 
     {:noreply, socket}
   end
