@@ -77,9 +77,9 @@ The goal is to allow users to try out the app without registration, only prompti
    - [x] Make sure we have test coverage for the new changes
 
 9. **Update Privacy and Terms**
-   - [ ] Update privacy policy to address anonymous user data
-   - [ ] Document data retention policies for anonymous accounts
-   - [ ] Make sure we have test coverage for the new changes
+   - [x] Update privacy policy to address anonymous user data
+   - [x] Document data retention policies for anonymous accounts
+   - [x] Make sure we have test coverage for the new changes
 
 ### Phase 4: Testing and Launch
 

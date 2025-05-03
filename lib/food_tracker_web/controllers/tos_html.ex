@@ -68,7 +68,10 @@ defmodule FoodTrackerWeb.TosHTML do
           4. User Accounts
         </h2>
         <p class="mb-4 text-gray-700 dark:text-gray-300">
-          To use the Service, you need to create an account by providing a valid email address and secure password. You are responsible for:
+          To use the Service, you can either create a registered account or use it anonymously.
+        </p>
+        <p class="mb-4 text-gray-700 dark:text-gray-300">
+          When using a registered account, you need to provide a valid email address and secure password. You are responsible for:
         </p>
         <ul class="list-disc pl-8 mb-4 text-gray-700 dark:text-gray-300">
           <li>Maintaining the confidentiality of your account credentials</li>
@@ -76,6 +79,15 @@ defmodule FoodTrackerWeb.TosHTML do
           <li>
             Backing up any data you consider important, as we do not guarantee data preservation
           </li>
+        </ul>
+        <p class="mb-4 text-gray-700 dark:text-gray-300">
+          When using the Service anonymously:
+        </p>
+        <ul class="list-disc pl-8 mb-4 text-gray-700 dark:text-gray-300">
+          <li>Your session is identified by a cookie with a unique identifier</li>
+          <li>Your data will be retained for a maximum of 30 days of inactivity</li>
+          <li>You can convert to a registered account at any time to preserve your data</li>
+          <li>Anonymous accounts may be deleted during routine maintenance</li>
         </ul>
 
         <h2 class="text-2xl font-semibold mt-6 mb-3 text-gray-800 dark:text-gray-100">
@@ -108,6 +120,14 @@ defmodule FoodTrackerWeb.TosHTML do
         <p class="mb-4 text-gray-700 dark:text-gray-300">
           THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT ANY WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT.
         </p>
+        <p class="mb-4 text-gray-700 dark:text-gray-300">
+          For anonymous users, we additionally make no warranty that:
+        </p>
+        <ul class="list-disc pl-8 mb-4 text-gray-700 dark:text-gray-300">
+          <li>Your data will be preserved beyond the 30-day inactivity period</li>
+          <li>The anonymous user functionality will remain available indefinitely</li>
+          <li>Your anonymous user session will be accessible across different devices or browsers</li>
+        </ul>
         <p class="mb-4 text-gray-700 dark:text-gray-300">
           As an exercise project, we make no warranty that:
         </p>
