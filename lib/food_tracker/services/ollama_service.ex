@@ -96,7 +96,6 @@ defmodule FoodTracker.Services.OllamaService do
       response_text
       |> String.trim()
       |> remove_thinking_parts()
-      |> append_unit(unit)
 
     {:ok, processed_text}
   end
@@ -109,9 +108,5 @@ defmodule FoodTracker.Services.OllamaService do
     # Strip out everything between <think> and </think>
     Regex.replace(~r/<think>.*?<\/think>/s, text, "")
     |> String.trim()
-  end
-
-  defp append_unit(text, unit) do
-    text <> " " <> unit
   end
 end

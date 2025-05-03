@@ -102,10 +102,10 @@
       </:col>
       <:col :let={{_id, food__track}} label="Date">{food__track.date}</:col>
       <:col :let={{_id, food__track}} label="Time">{food__track.time}</:col>
-      <:col :let={{_id, food__track}} label="Calories">
+      <:col :let={{_id, food__track}} label="Calories (kcal)">
         {food__track.calories}
       </:col>
-      <:col :let={{_id, food__track}} label="Protein">
+      <:col :let={{_id, food__track}} label="Protein (g)">
         {food__track.protein}
       </:col>
       <:action :let={{id, food__track}}>
@@ -124,5 +124,4 @@
     </.table>
   </div>
 </div>
-
 <!-- Footer -->

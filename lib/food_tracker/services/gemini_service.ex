@@ -123,7 +123,7 @@ defmodule FoodTracker.Services.GeminiService do
             if String.downcase(cleaned_text) == "unknown" do
               {:error, "Gemini does not know the answer: #{cleaned_text}"}
             else
-              {:ok, append_unit(cleaned_text, unit)}
+              {:ok, cleaned_text}
             end
 
           _ ->
@@ -139,9 +139,5 @@ defmodule FoodTracker.Services.GeminiService do
     # Strip out everything between <think> and </think>
     Regex.replace(~r/<think>.*?<\/think>/s, text, "")
     |> String.trim()
-  end
-
-  defp append_unit(text, unit) do
-    text <> " " <> unit
   end
 end
