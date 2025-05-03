@@ -10,8 +10,8 @@ Demo: https://munchmetrics.vossihub.org/
 
 [x] Make sure db is persistent when running new container
 [x] Fix Today's Food Log scroll bars / layout
-[ ] Always default to the current date and time
-[ ] Implement anonymous user functionality
+[x] Always default to the current date and time
+[x] Implement anonymous user functionality
 
 ## Anonymous User Access Implementation Plan
 
@@ -37,57 +37,57 @@ The goal is to allow users to try out the app without registration, only prompti
    - [x] Test inactive anonymous user cleanup
    - [x] Test session preservation during conversion
 
-### Phase 2: Core Implementation (Current Focus)
+### Phase 2: Core Implementation (✓ Completed)
 
 4. **Update Authentication System**
 
-   - Modify router to allow public access to home and monthly pages
-   - Create anonymous user module and plug
-   - Implement anonymous user tracking via cookies
-   - Update LiveView hooks to handle anonymous users
-   - Make sure we have test coverage for the new changes
+   - [x] Modify router to allow public access to home and monthly pages
+   - [x] Create anonymous user module and plug
+   - [x] Implement anonymous user tracking via cookies
+   - [x] Update LiveView hooks to handle anonymous users
+   - [x] Make sure we have test coverage for the new changes
 
 5. **Track Anonymous Users**
 
-   - Set cookie with UUID for anonymous users
-   - Create anonymous user accounts when saving first food track
-   - Update last_active_at on each page visit
-   - Make sure we have test coverage for the new changes
+   - [x] Set cookie with UUID for anonymous users
+   - [x] Create anonymous user accounts when saving first food track
+   - [x] Update last_active_at on each page visit
+   - [x] Make sure we have test coverage for the new changes
 
 6. **User Conversion Workflow**
-   - Add functionality to convert anonymous users to registered users
-   - Preserve existing food tracking data during conversion
-   - Update email confirmation process to handle anonymous users
-   - Make sure we have test coverage for the new changes
+   - [x] Add functionality to convert anonymous users to registered users
+   - [x] Preserve existing food tracking data during conversion
+   - [x] Update email confirmation process to handle anonymous users
+   - [x] Make sure we have test coverage for the new changes
 
-### Phase 3: UI and Cleanup
+### Phase 3: UI and Cleanup (✓ Completed)
 
 7. **UI Notifications**
 
-   - Add persistent banner for anonymous users
-   - Show clear notification about data persistence limitations
-   - Provide easy path to registration
-   - Make sure we have test coverage for the new changes
+   - [x] Add persistent banner for anonymous users
+   - [x] Show clear notification about data persistence limitations
+   - [x] Provide easy path to registration
+   - [x] Make sure we have test coverage for the new changes
 
 8. **Implement Cleanup Job**
 
-   - Create periodic task to clean up inactive anonymous accounts
-   - Set up 30-day inactivity threshold matching cookie duration
-   - Add logging for account cleanup
-   - Make sure we have test coverage for the new changes
+   - [x] Create periodic task to clean up inactive anonymous accounts
+   - [x] Set up 30-day inactivity threshold matching cookie duration
+   - [x] Add logging for account cleanup
+   - [x] Make sure we have test coverage for the new changes
 
 9. **Update Privacy and Terms**
-   - Update privacy policy to address anonymous user data
-   - Document data retention policies for anonymous accounts
-   - Make sure we have test coverage for the new changes
+   - [ ] Update privacy policy to address anonymous user data
+   - [ ] Document data retention policies for anonymous accounts
+   - [ ] Make sure we have test coverage for the new changes
 
 ### Phase 4: Testing and Launch
 
 10. **Final Testing**
 
-    - Verify all user flows (anonymous → registered)
-    - Test edge cases for authentication
-    - Test data persistence through conversion
+    - [ ] Verify all user flows (anonymous → registered)
+    - [ ] Test edge cases for authentication
+    - [ ] Test data persistence through conversion
 
 ## For Users
 

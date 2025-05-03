@@ -9,7 +9,9 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
   def mount(_params, _session, socket) do
     today = Date.utc_today() |> Utils.date_to_dmy_string()
     today_ymd = Date.utc_today() |> Utils.date_to_ymd_string()
-    user_id = socket.assigns.current_user.id
+
+    # Get the user ID from either the current user or anonymous user
+    user_id = get_user_id(socket)
 
     socket =
       socket
@@ -25,13 +27,14 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
       socket
       |> assign(:total_calories, total_calories)
       |> assign(:total_protein, total_protein)
+      |> maybe_assign_anonymous_banner()
 
     {:ok, stream(socket, :food_tracks, food_tracks)}
   end
 
   @impl true
   def handle_params(params, _url, socket) do
-    user_id = socket.assigns.current_user.id
+    user_id = get_user_id(socket)
 
     socket =
       case params do
@@ -88,7 +91,7 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
   @impl true
   def handle_info({FoodTrackerWeb.Food_TrackLive.FormComponent, {:saved, food__track}}, socket) do
     # After saving a new food track, refresh the daily totals
-    user_id = socket.assigns.current_user.id
+    user_id = get_user_id(socket)
     date_string = food__track.date
 
     # Get updated totals
@@ -110,7 +113,7 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
     {:ok, _} = Food_Tracking.delete_food__track(food__track)
 
     # After deleting, refresh the daily totals
-    user_id = socket.assigns.current_user.id
+    user_id = get_user_id(socket)
     current_date = socket.assigns.date
     date_ymd = FoodTracker.Utils.string_to_date(current_date) |> Utils.date_to_ymd_string()
 
@@ -128,7 +131,7 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
   end
 
   def handle_event("previous_day", _, socket) do
-    user_id = socket.assigns.current_user.id
+    user_id = get_user_id(socket)
     current_date = socket.assigns.date
     current_date = FoodTracker.Utils.string_to_date(current_date)
     new_date = Date.add(current_date, -1)
@@ -151,7 +154,7 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
   end
 
   def handle_event("today", _, socket) do
-    user_id = socket.assigns.current_user.id
+    user_id = get_user_id(socket)
     new_date = Date.utc_today()
     new_date_string = Utils.date_to_ymd_string(new_date)
 
@@ -172,7 +175,7 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
   end
 
   def handle_event("next_day", _, socket) do
-    user_id = socket.assigns.current_user.id
+    user_id = get_user_id(socket)
     current_date = socket.assigns.date
     current_date = FoodTracker.Utils.string_to_date(current_date)
     new_date = Date.add(current_date, 1)
@@ -192,5 +195,25 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
       |> stream(:food_tracks, food_tracks)
 
     {:noreply, socket}
+  end
+
+  # Helper functions for anonymous user support
+
+  # Get user ID from either current_user or anonymous_user
+  defp get_user_id(socket) do
+    cond do
+      socket.assigns[:current_user] -> socket.assigns.current_user.id
+      socket.assigns[:anonymous_user] -> socket.assigns.anonymous_user.id
+      true -> raise "No user found in socket assigns"
+    end
+  end
+
+  # Add a banner for anonymous users
+  defp maybe_assign_anonymous_banner(socket) do
+    if socket.assigns[:anonymous_user] do
+      assign(socket, :anonymous_banner, true)
+    else
+      assign(socket, :anonymous_banner, false)
+    end
   end
 end

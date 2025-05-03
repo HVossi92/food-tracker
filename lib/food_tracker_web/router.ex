@@ -2,6 +2,7 @@ defmodule FoodTrackerWeb.Router do
   use FoodTrackerWeb, :router
 
   import FoodTrackerWeb.UserAuth
+  import FoodTrackerWeb.AnonymousAuth
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -11,17 +12,19 @@ defmodule FoodTrackerWeb.Router do
     plug :protect_from_forgery
     plug :put_secure_browser_headers
     plug :fetch_current_user
+    plug :fetch_anonymous_user
   end
 
   pipeline :api do
     plug :accepts, ["json"]
   end
 
+  # Public routes for both authenticated and anonymous users
   scope "/", FoodTrackerWeb do
     pipe_through :browser
 
-    live_session :main,
-      on_mount: [{FoodTrackerWeb.UserAuth, :ensure_authenticated}] do
+    live_session :public_or_authenticated,
+      on_mount: [{FoodTrackerWeb.AnonymousAuth, :ensure_authenticated_or_anonymous}] do
       live "/", Food_TrackLive.Index, :index
       live "/food_tracks", Food_TrackLive.Index, :index
       live "/food_tracks/new", Food_TrackLive.Index, :new

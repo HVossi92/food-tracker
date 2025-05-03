@@ -11,14 +11,13 @@ defmodule FoodTracker.Application do
       FoodTrackerWeb.Telemetry,
       FoodTracker.Repo,
       {Ecto.Migrator,
-        repos: Application.fetch_env!(:food_tracker, :ecto_repos),
-        skip: skip_migrations?()},
+       repos: Application.fetch_env!(:food_tracker, :ecto_repos), skip: skip_migrations?()},
       {DNSCluster, query: Application.get_env(:food_tracker, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: FoodTracker.PubSub},
       # Start the Finch HTTP client for sending emails
       {Finch, name: FoodTracker.Finch},
-      # Start a worker by calling: FoodTracker.Worker.start_link(arg)
-      # {FoodTracker.Worker, arg},
+      # Start the anonymous user cleanup scheduler
+      FoodTracker.Scheduler,
       # Start to serve requests, typically the last entry
       FoodTrackerWeb.Endpoint
     ]

@@ -22,7 +22,7 @@ defmodule FoodTrackerWeb.Food_TrackLive.FormComponent do
         <.input field={@form[:date]} type="date" label="Date" />
         <.input field={@form[:time]} type="time" label="Time" />
         <:actions>
-          <.button phx-disable-with="Saving...">Save Food  track</.button>
+          <.button phx-disable-with="Saving...">Save Food track</.button>
         </:actions>
       </.simple_form>
     </div>
@@ -61,7 +61,7 @@ defmodule FoodTrackerWeb.Food_TrackLive.FormComponent do
 
         {:noreply,
          socket
-         |> put_flash(:info, "Food  track updated successfully")
+         |> put_flash(:info, "Food track updated successfully")
          |> push_patch(to: socket.assigns.patch)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
@@ -71,7 +71,9 @@ defmodule FoodTrackerWeb.Food_TrackLive.FormComponent do
 
   defp save_food__track(socket, :new, food__track_params) do
     # Add the current user's ID to the food track params
-    food__track_params = Map.put(food__track_params, "user_id", socket.assigns.current_user.id)
+    # Works with both registered and anonymous users
+    user_id = socket.assigns.current_user.id
+    food__track_params = Map.put(food__track_params, "user_id", user_id)
 
     case Food_Tracking.create_food__track(food__track_params) do
       {:ok, food__track} ->
@@ -79,7 +81,7 @@ defmodule FoodTrackerWeb.Food_TrackLive.FormComponent do
 
         {:noreply,
          socket
-         |> put_flash(:info, "Food  track created successfully")
+         |> put_flash(:info, "Food track created successfully")
          |> push_patch(to: socket.assigns.patch)}
 
       {:error, %Ecto.Changeset{} = changeset} ->

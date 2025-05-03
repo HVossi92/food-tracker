@@ -2,8 +2,8 @@ defmodule FoodTrackerWeb.PageControllerTest do
   use FoodTrackerWeb.ConnCase
 
   test "GET /", %{conn: conn} do
-    # The "/" path now redirects to login, this is expected
+    # With anonymous auth, the "/" path should no longer redirect to login
     conn = get(conn, ~p"/")
-    assert redirected_to(conn) == ~p"/users/log_in"
+    assert html_response(conn, 200) =~ "Daily Food Tracker"
   end
 end

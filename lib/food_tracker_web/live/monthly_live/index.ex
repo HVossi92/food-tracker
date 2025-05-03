@@ -10,6 +10,9 @@ defmodule FoodTrackerWeb.MonthlyLive.Index do
     today = Date.utc_today()
     current_month = %{month: today.month, year: today.year}
 
+    # Get the user ID from either current_user or anonymous_user
+    user_id = get_user_id(socket)
+
     socket =
       socket
       |> assign(:food__track, %Food_Track{})
@@ -21,9 +24,10 @@ defmodule FoodTrackerWeb.MonthlyLive.Index do
         get_month_food_tracks(
           current_month.month,
           current_month.year,
-          socket.assigns.current_user.id
+          user_id
         )
       )
+      |> maybe_assign_anonymous_banner()
 
     {:ok, socket}
   end
@@ -66,6 +70,7 @@ defmodule FoodTrackerWeb.MonthlyLive.Index do
   def handle_event("previous_month", _, socket) do
     current_month = socket.assigns.current_month
     {year, month} = previous_month(current_month.month, current_month.year)
+    user_id = get_user_id(socket)
 
     socket =
       socket
@@ -73,7 +78,7 @@ defmodule FoodTrackerWeb.MonthlyLive.Index do
       |> assign(:month_name, month_name(month))
       |> assign(
         :food_tracks,
-        get_month_food_tracks(month, year, socket.assigns.current_user.id)
+        get_month_food_tracks(month, year, user_id)
       )
 
     {:noreply, socket}
@@ -82,18 +87,20 @@ defmodule FoodTrackerWeb.MonthlyLive.Index do
   def handle_event("next_month", _, socket) do
     current_month = socket.assigns.current_month
     {year, month} = next_month(current_month.month, current_month.year)
+    user_id = get_user_id(socket)
 
     socket =
       socket
       |> assign(:current_month, %{month: month, year: year})
       |> assign(:month_name, month_name(month))
-      |> assign(:food_tracks, get_month_food_tracks(month, year, socket.assigns.current_user.id))
+      |> assign(:food_tracks, get_month_food_tracks(month, year, user_id))
 
     {:noreply, socket}
   end
 
   def handle_event("jump_to_today", _, socket) do
     today = Date.utc_today()
+    user_id = get_user_id(socket)
 
     if today.month == socket.assigns.current_month.month &&
          today.year == socket.assigns.current_month.year do
@@ -106,7 +113,7 @@ defmodule FoodTrackerWeb.MonthlyLive.Index do
         |> assign(:month_name, month_name(today.month))
         |> assign(
           :food_tracks,
-          get_month_food_tracks(today.month, today.year, socket.assigns.current_user.id)
+          get_month_food_tracks(today.month, today.year, user_id)
         )
 
       {:noreply, socket}
@@ -115,6 +122,7 @@ defmodule FoodTrackerWeb.MonthlyLive.Index do
 
   defp update_food_tracks(socket) do
     current_month = socket.assigns.current_month
+    user_id = get_user_id(socket)
 
     assign(
       socket,
@@ -122,7 +130,7 @@ defmodule FoodTrackerWeb.MonthlyLive.Index do
       get_month_food_tracks(
         current_month.month,
         current_month.year,
-        socket.assigns.current_user.id
+        user_id
       )
     )
   end
@@ -169,4 +177,24 @@ defmodule FoodTrackerWeb.MonthlyLive.Index do
   defp month_name(10), do: "October"
   defp month_name(11), do: "November"
   defp month_name(12), do: "December"
+
+  # Helper functions for anonymous user support
+
+  # Get user ID from either current_user or anonymous_user
+  defp get_user_id(socket) do
+    cond do
+      socket.assigns[:current_user] -> socket.assigns.current_user.id
+      socket.assigns[:anonymous_user] -> socket.assigns.anonymous_user.id
+      true -> raise "No user found in socket assigns"
+    end
+  end
+
+  # Add a banner for anonymous users
+  defp maybe_assign_anonymous_banner(socket) do
+    if socket.assigns[:anonymous_user] do
+      assign(socket, :anonymous_banner, true)
+    else
+      assign(socket, :anonymous_banner, false)
+    end
+  end
 end
