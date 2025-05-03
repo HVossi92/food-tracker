@@ -469,23 +469,23 @@ defmodule FoodTrackerWeb.CoreComponents do
       end
 
     ~H"""
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8 overflow-x-auto">
       <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-semibold text-gray-800 dark:text-white">Today's Food Log</h2>
       </div>
-      <div class="">
-        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+      <div class="overflow-x-auto">
+        <table class="w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead class="bg-gray-50 dark:bg-gray-700">
             <tr>
               <th
                 :for={col <- @col}
-                class="p-0 pb-4 pr-6 font-normal px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                class="p-0 pb-4 pr-6 font-normal px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
               >
                 {col[:label]}
               </th>
               <th
                 :if={@action != []}
-                class="relative p-0 pb-4 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                class="relative p-0 pb-4 px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
               >
                 <span class="sr-only">{gettext("Actions")}</span>
               </th>
@@ -501,26 +501,29 @@ defmodule FoodTrackerWeb.CoreComponents do
                 :for={{col, i} <- Enum.with_index(@col)}
                 phx-click={@row_click && @row_click.(row)}
                 class={[
-                  "px-6 py-4 whitespace-nowrap text-sm relative p-0 text-sm font-medium text-gray-900 dark:text-white",
+                  "px-3 sm:px-6 py-2 sm:py-4 text-sm relative p-0 font-medium text-gray-900 dark:text-white",
                   @row_click && "hover:cursor-pointer"
                 ]}
               >
-                <div class="block py-4 pr-6">
+                <div class="block py-2 sm:py-4 pr-2 sm:pr-6">
                   <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-zinc-50 dark:group-hover:bg-gray-700 sm:rounded-l-xl" />
-                  <span class={["relative", i == 0 && "font-semibold "]}>
+                  <span
+                    class={["relative", i == 0 && "font-semibold "]}
+                    style="word-break: break-word;"
+                  >
                     {render_slot(col, @row_item.(row))}
                   </span>
                 </div>
               </td>
               <td
                 :if={@action != []}
-                class="px-6 py-4 whitespace-nowrap text-sm relative w-14 p-0 text-sm font-medium text-gray-900 dark:text-white"
+                class="px-3 sm:px-6 py-2 sm:py-4 text-sm relative w-14 p-0 font-medium text-gray-900 dark:text-white"
               >
-                <div class="relative whitespace-nowrap py-4 text-right text-sm font-medium">
+                <div class="relative py-2 sm:py-4 text-right text-sm font-medium">
                   <span class="absolute -inset-y-px -right-4 left-0 group-hover:bg-zinc-50 dark:group-hover:bg-gray-700 sm:rounded-r-xl" />
                   <span
                     :for={action <- @action}
-                    class="relative ml-4 font-semibold leading-6 text-emerald-600 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300"
+                    class="relative ml-2 sm:ml-4 font-semibold leading-6 text-emerald-600 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300"
                   >
                     {render_slot(action, @row_item.(row))}
                   </span>
