@@ -2,6 +2,10 @@ defmodule FoodTracker.Services.GeminiService do
   @moduledoc """
   Service for interacting with Google's Gemini API for nutrition information.
   """
+  @behaviour FoodTracker.Services.NutritionService
+
+  require Logger
+  alias FoodTracker.Services.NutritionInfo
 
   @system_prompt_calories "You are a nutritionist providing estimates for calories in foods. You must only respond with a single number representing the estimated number of kilocalories (kcal) in the given food item. If you don't know, say 'Unknown'. Always respond with a number, do not respond with your thinking steps."
   @system_prompt_protein "You are a nutritionist providing estimates for protein content in foods. You must only respond with a single number representing the estimated grams of protein in the given food item. If you don't know, say 'Unknown'. Always respond with a number, do not respond with your thinking steps."
@@ -10,13 +14,9 @@ defmodule FoodTracker.Services.GeminiService do
   defp gemini_url, do: Application.get_env(:food_tracker, :gemini_api)[:url]
   defp api_key, do: Application.get_env(:food_tracker, :gemini_api)[:api_key]
 
-  @doc """
-  Get nutrition information for a food item using Gemini API.
-  Returns {:ok, %{calories: string, protein: string}} on success
-  or {:error, reason} on failure.
-  """
+  @impl true
   def get_nutrition_info(food_item) do
-    IO.puts("Gemini")
+    Logger.info("Fetching nutrition info from Gemini for: #{food_item}")
 
     calories_task =
       Task.async(fn ->
@@ -45,15 +45,21 @@ defmodule FoodTracker.Services.GeminiService do
     # Handle results based on whether they were successful or not
     case {calories_result, protein_result} do
       {{:ok, calories}, {:ok, protein}} ->
-        {:ok, %{calories: calories, protein: protein}}
+        {:ok, %NutritionInfo{calories: calories, protein: protein}}
 
       {{:error, calories_error}, {:ok, _protein}} ->
+        Logger.error("Failed to get calories from Gemini: #{calories_error}")
         {:error, "Failed to get calories: #{calories_error}"}
 
       {{:ok, _calories}, {:error, protein_error}} ->
+        Logger.error("Failed to get protein from Gemini: #{protein_error}")
         {:error, "Failed to get protein: #{protein_error}"}
 
       {{:error, calories_error}, {:error, protein_error}} ->
+        Logger.error(
+          "Failed to get both calories and protein from Gemini: #{calories_error}, #{protein_error}"
+        )
+
         {:error, "Failed to get calories: #{calories_error} and protein: #{protein_error}"}
     end
   end
@@ -93,27 +99,32 @@ defmodule FoodTracker.Services.GeminiService do
 
       {:ok, %Finch.Response{status: status, body: body}} ->
         error_message = "HTTP error: #{status}, #{body}"
-        IO.puts("Error: #{error_message}")
+        Logger.error(error_message)
         {:error, error_message}
 
       {:error, reason} ->
-        IO.puts("Error: #{inspect(reason)}")
+        Logger.error("Request error: #{inspect(reason)}")
         {:error, inspect(reason)}
     end
   end
 
   defp process_response(body, unit) do
+    IO.inspect(body, label: "Body")
+
     case Jason.decode(body) do
       {:ok, decoded} ->
         case decoded do
           %{"candidates" => [%{"content" => %{"parts" => [%{"text" => text} | _]}} | _]} ->
-            processed_text =
+            cleaned_text =
               text
               |> String.trim()
               |> remove_thinking_parts()
-              |> append_unit(unit)
 
-            {:ok, processed_text}
+            if String.downcase(cleaned_text) == "unknown" do
+              {:error, "Gemini does not know the answer: #{cleaned_text}"}
+            else
+              {:ok, append_unit(cleaned_text, unit)}
+            end
 
           _ ->
             {:error, "Unexpected response format from Gemini API"}

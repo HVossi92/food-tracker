@@ -82,11 +82,28 @@ defmodule FoodTracker.Food_Tracking do
           |> Map.put("protein", nutrition_info.protein)
 
         {:error, reason} ->
-          IO.puts("Error getting nutrition info: #{reason}")
-          # Set default values or placeholders for calories and protein
-          attrs
-          |> Map.put("calories", "Not available")
-          |> Map.put("protein", "Not available")
+          IO.puts("Error getting nutrition info from Gemini: #{reason}")
+
+          # Try Ollama as a fallback
+          IO.puts("Trying Ollama as a fallback...")
+          ollama_result = OllamaService.get_nutrition_info(attrs["name"])
+
+          case ollama_result do
+            {:ok, nutrition_info} ->
+              IO.inspect(nutrition_info, label: "Ollama nutrition information")
+
+              attrs
+              |> Map.put("calories", nutrition_info.calories)
+              |> Map.put("protein", nutrition_info.protein)
+
+            {:error, ollama_reason} ->
+              IO.puts("Error getting nutrition info from Ollama: #{ollama_reason}")
+
+              # Both services failed, set default values
+              attrs
+              |> Map.put("calories", "Unavailable")
+              |> Map.put("protein", "Unavailable")
+          end
       end
 
     %Food_Track{}

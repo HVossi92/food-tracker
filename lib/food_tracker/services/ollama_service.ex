@@ -2,16 +2,17 @@ defmodule FoodTracker.Services.OllamaService do
   @moduledoc """
   Service for interacting with Ollama AI for nutrition information.
   """
+  @behaviour FoodTracker.Services.NutritionService
+
+  require Logger
+  alias FoodTracker.Services.NutritionInfo
 
   @system_prompt_calories "You are a nutritionist providing estimates for calories in foods. You must only respond with a single number representing the estimated number of kilocalories (kcal) in the given food item. If you don't know, say 'Unknown'. Always respond with a number, do not respond with your thinking steps."
   @system_prompt_protein "You are a nutritionist providing estimates for protein content in foods. You must only respond with a single number representing the estimated grams of protein in the given food item. If you don't know, say 'Unknown'. Always respond with a number, do not respond with your thinking steps."
 
-  @doc """
-  Get nutrition information for a food item using Ollama.
-  Returns a map with calories and protein information.
-  """
+  @impl true
   def get_nutrition_info(food_item) do
-    IO.puts("Ollama")
+    Logger.info("Fetching nutrition info from Ollama for: #{food_item}")
 
     calories_task =
       Task.async(fn ->
@@ -37,26 +38,41 @@ defmodule FoodTracker.Services.OllamaService do
     calories_result = Task.await(calories_task, 32_000)
     protein_result = Task.await(protein_task, 32_000)
 
-    # Return the results
-    %{
-      calories: calories_result,
-      protein: protein_result
-    }
+    # Handle results based on whether they were successful or not
+    case {calories_result, protein_result} do
+      {{:ok, calories}, {:ok, protein}} ->
+        {:ok, %NutritionInfo{calories: calories, protein: protein}}
+
+      {{:error, calories_error}, {:ok, _protein}} ->
+        Logger.error("Failed to get calories from Ollama: #{calories_error}")
+        {:error, "Failed to get calories: #{calories_error}"}
+
+      {{:ok, _calories}, {:error, protein_error}} ->
+        Logger.error("Failed to get protein from Ollama: #{protein_error}")
+        {:error, "Failed to get protein: #{protein_error}"}
+
+      {{:error, calories_error}, {:error, protein_error}} ->
+        Logger.error(
+          "Failed to get both calories and protein from Ollama: #{calories_error}, #{protein_error}"
+        )
+
+        {:error, "Failed to get calories: #{calories_error} and protein: #{protein_error}"}
+    end
   end
 
   defp extract_response(response) do
     case response do
       {:ok, %{"response" => response_text, "done" => true}} ->
-        String.trim(response_text)
+        {:ok, String.trim(response_text)}
 
       {:ok, %{"done" => false}} ->
-        "Processing not complete"
+        {:error, "Processing not complete"}
 
       {:error, error} ->
-        "Error: #{inspect(error)}"
+        {:error, "Error: #{inspect(error)}"}
 
       unexpected ->
-        "Unexpected response: #{inspect(unexpected)}"
+        {:error, "Unexpected response: #{inspect(unexpected)}"}
     end
   end
 
@@ -72,12 +88,30 @@ defmodule FoodTracker.Services.OllamaService do
       }
     )
     |> extract_response()
+    |> process_response(unit)
+  end
+
+  defp process_response({:ok, response_text}, unit) do
+    processed_text =
+      response_text
+      |> String.trim()
+      |> remove_thinking_parts()
+      |> append_unit(unit)
+
+    {:ok, processed_text}
+  end
+
+  defp process_response({:error, reason}, _unit) do
+    {:error, reason}
+  end
+
+  defp remove_thinking_parts(text) do
+    # Strip out everything between <think> and </think>
+    Regex.replace(~r/<think>.*?<\/think>/s, text, "")
     |> String.trim()
-    |> then(fn str ->
-      # strip out everything inbetween <think> and </think>
-      str = Regex.replace(~r/<think>.*?<\/think>/s, str, "")
-      result = String.trim(str) <> " " <> unit
-      result
-    end)
+  end
+
+  defp append_unit(text, unit) do
+    text <> " " <> unit
   end
 end
