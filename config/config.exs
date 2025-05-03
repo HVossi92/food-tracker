@@ -61,6 +61,12 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
+# Configure Gemini API
+config :food_tracker, :gemini_api,
+  url: "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent",
+  # Will be overridden by environment-specific config
+  api_key: System.get_env("GEMINI_API_KEY") || nil
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"

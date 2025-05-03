@@ -7,6 +7,7 @@ defmodule FoodTracker.Food_Tracking do
   alias FoodTracker.Repo
   alias FoodTracker.Food_Tracking.Food_Track
   alias FoodTracker.Services.OllamaService
+  alias FoodTracker.Services.GeminiService
 
   @doc """
   Returns the list of food_tracks.
@@ -68,16 +69,25 @@ defmodule FoodTracker.Food_Tracking do
 
   """
   def create_food__track(attrs \\ %{}) do
-    {execution_time, nutrition_info} =
-      :timer.tc(fn -> OllamaService.get_nutrition_info(attrs["name"]) end)
+    nutrition_result = GeminiService.get_nutrition_info(attrs["name"])
 
-    IO.puts("Nutrition info retrieval time: #{execution_time / 1_000_000} seconds")
-    IO.inspect(nutrition_info, label: "Nutrition information")
+    # Process the nutrition info based on whether it was successful or not
+    attrs =
+      case nutrition_result do
+        {:ok, nutrition_info} ->
+          IO.inspect(nutrition_info, label: "Nutrition information")
 
-    attrs = Map.put(attrs, "calories", nutrition_info[:calories])
-    attrs = Map.put(attrs, "protein", nutrition_info[:protein])
+          attrs
+          |> Map.put("calories", nutrition_info.calories)
+          |> Map.put("protein", nutrition_info.protein)
 
-    IO.inspect(attrs, label: "attrs")
+        {:error, reason} ->
+          IO.puts("Error getting nutrition info: #{reason}")
+          # Set default values or placeholders for calories and protein
+          attrs
+          |> Map.put("calories", "Not available")
+          |> Map.put("protein", "Not available")
+      end
 
     %Food_Track{}
     |> Food_Track.changeset(attrs)

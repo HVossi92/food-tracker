@@ -11,6 +11,8 @@ defmodule FoodTracker.Services.OllamaService do
   Returns a map with calories and protein information.
   """
   def get_nutrition_info(food_item) do
+    IO.puts("Ollama")
+
     calories_task =
       Task.async(fn ->
         ollama_request(
@@ -75,7 +77,6 @@ defmodule FoodTracker.Services.OllamaService do
       # strip out everything inbetween <think> and </think>
       str = Regex.replace(~r/<think>.*?<\/think>/s, str, "")
       result = String.trim(str) <> " " <> unit
-      IO.puts(result)
       result
     end)
   end

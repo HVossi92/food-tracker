@@ -95,11 +95,23 @@
       rows={@streams.food_tracks}
       row_click={fn {_id, food__track} -> JS.navigate(~p"/food_tracks/#{food__track}") end}
     >
-      <:col :let={{_id, food__track}} label="Name">{food__track.name}</:col>
+      <:col :let={{_id, food__track}} label="Name">
+        {if String.length(food__track.name) > 32,
+          do: String.slice(food__track.name, 0, 32) <> "...",
+          else: food__track.name}
+      </:col>
       <:col :let={{_id, food__track}} label="Date">{food__track.date}</:col>
       <:col :let={{_id, food__track}} label="Time">{food__track.time}</:col>
-      <:col :let={{_id, food__track}} label="Calories">{food__track.calories}</:col>
-      <:col :let={{_id, food__track}} label="Protein">{food__track.protein}</:col>
+      <:col :let={{_id, food__track}} label="Calories">
+        {if String.length("#{food__track.calories}") > 10,
+          do: "#{String.slice("#{food__track.calories}", 0, 10)}...",
+          else: food__track.calories}
+      </:col>
+      <:col :let={{_id, food__track}} label="Protein">
+        {if String.length("#{food__track.protein}") > 10,
+          do: "#{String.slice("#{food__track.protein}", 0, 10)}...",
+          else: food__track.protein}
+      </:col>
       <:action :let={{id, food__track}}>
         <div class="flex space-x-3">
           <.link patch={~p"/food_tracks/#{food__track}/show/edit"} phx-click={JS.push_focus()}>
