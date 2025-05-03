@@ -116,16 +116,70 @@
         </div>
       </div>
       
+<!-- Monthly Summary -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 mb-8">
+        <div class="grid grid-cols-2 gap-4">
+          <% # Calculate monthly totals
+          {monthly_calories, monthly_protein} =
+            @food_tracks
+            |> Map.values()
+            |> Enum.reduce({0, 0}, fn day_tracks, {cal_acc, prot_acc} ->
+              {day_calories, day_protein} =
+                day_tracks
+                |> Enum.reduce({0, 0}, fn track, {track_cal, track_prot} ->
+                  cal = if track.calories && track.calories != -1.0, do: track.calories, else: 0
+                  prot = if track.protein && track.protein != -1.0, do: track.protein, else: 0
+                  {track_cal + cal, track_prot + prot}
+                end)
+
+              {cal_acc + day_calories, prot_acc + day_protein}
+            end) %>
+          <div class="p-4 bg-emerald-50 dark:bg-emerald-900 rounded-lg text-center">
+            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Monthly Calories</h3>
+            <p class="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+              {monthly_calories} kcal
+            </p>
+          </div>
+          <div class="p-4 bg-blue-50 dark:bg-blue-900 rounded-lg text-center">
+            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Monthly Protein</h3>
+            <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">
+              {monthly_protein} g
+            </p>
+          </div>
+        </div>
+      </div>
+      
 <!-- Calendar View -->
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8">
         <div class="grid grid-cols-7 gap-1 text-center mb-2">
-          <div class="text-sm font-medium text-gray-500 dark:text-gray-400 p-2">Sunday</div>
-          <div class="text-sm font-medium text-gray-500 dark:text-gray-400 p-2">Monday</div>
-          <div class="text-sm font-medium text-gray-500 dark:text-gray-400 p-2">Tuesday</div>
-          <div class="text-sm font-medium text-gray-500 dark:text-gray-400 p-2">Wednesday</div>
-          <div class="text-sm font-medium text-gray-500 dark:text-gray-400 p-2">Thursday</div>
-          <div class="text-sm font-medium text-gray-500 dark:text-gray-400 p-2">Friday</div>
-          <div class="text-sm font-medium text-gray-500 dark:text-gray-400 p-2">Saturday</div>
+          <div class="text-sm font-medium text-gray-500 dark:text-gray-400 p-2">
+            <span class="hidden sm:inline">Sunday</span>
+            <span class="sm:hidden">S</span>
+          </div>
+          <div class="text-sm font-medium text-gray-500 dark:text-gray-400 p-2">
+            <span class="hidden sm:inline">Monday</span>
+            <span class="sm:hidden">M</span>
+          </div>
+          <div class="text-sm font-medium text-gray-500 dark:text-gray-400 p-2">
+            <span class="hidden sm:inline">Tuesday</span>
+            <span class="sm:hidden">T</span>
+          </div>
+          <div class="text-sm font-medium text-gray-500 dark:text-gray-400 p-2">
+            <span class="hidden sm:inline">Wednesday</span>
+            <span class="sm:hidden">W</span>
+          </div>
+          <div class="text-sm font-medium text-gray-500 dark:text-gray-400 p-2">
+            <span class="hidden sm:inline">Thursday</span>
+            <span class="sm:hidden">T</span>
+          </div>
+          <div class="text-sm font-medium text-gray-500 dark:text-gray-400 p-2">
+            <span class="hidden sm:inline">Friday</span>
+            <span class="sm:hidden">F</span>
+          </div>
+          <div class="text-sm font-medium text-gray-500 dark:text-gray-400 p-2">
+            <span class="hidden sm:inline">Saturday</span>
+            <span class="sm:hidden">S</span>
+          </div>
         </div>
         <div class="grid grid-cols-7 gap-2">
           <% first_day = Date.new!(@current_month.year, @current_month.month, 1)
@@ -189,11 +243,34 @@
                 <%= if length(day_tracks) > 3 do %>
                   <div>...</div>
                 <% end %>
+
+                <%= if has_tracks do %>
+                  <% # Calculate daily totals
+                  {total_calories, total_protein} =
+                    day_tracks
+                    |> Enum.reduce({0, 0}, fn track, {cal_acc, prot_acc} ->
+                      cal =
+                        if track.calories && track.calories != -1.0, do: track.calories, else: 0
+
+                      prot = if track.protein && track.protein != -1.0, do: track.protein, else: 0
+                      {cal_acc + cal, prot_acc + prot}
+                    end) %>
+                  <%= if total_calories > 0 do %>
+                    <div class="mt-1 font-semibold text-emerald-600 dark:text-emerald-400">
+                      {total_calories} kcal / {total_protein}g
+                    </div>
+                  <% end %>
+                <% end %>
               </div>
               <%= if has_tracks do %>
                 <span class="tooltip-text">
                   <%= for track <- day_tracks do %>
-                    {track.name}<br />
+                    <div>
+                      {track.name}
+                      <%= if track.calories && track.calories != -1.0 do %>
+                        ({track.calories} kcal, {track.protein}g protein)
+                      <% end %>
+                    </div>
                   <% end %>
                 </span>
               <% end %>

@@ -137,8 +137,17 @@ defmodule FoodTrackerWeb.MonthlyLive.Index do
     date_range
     |> Enum.reduce(%{}, fn date, acc ->
       date_string = Utils.date_to_ymd_string(date)
-      tracks = Food_Tracking.list_food_tracks_on(date_string, user_id)
-      Map.put(acc, date.day, tracks)
+      # Extract only the food_tracks from the response (which is now a map)
+      result = Food_Tracking.list_food_tracks_on(date_string, user_id)
+
+      food_tracks =
+        case result do
+          %{food_tracks: tracks} -> tracks
+          {:error, _} -> []
+          _ -> []
+        end
+
+      Map.put(acc, date.day, food_tracks)
     end)
   end
 
