@@ -9,6 +9,9 @@ defmodule FoodTracker.Accounts.User do
     field :hashed_password, :string, redact: true
     field :current_password, :string, virtual: true, redact: true
     field :confirmed_at, :utc_datetime
+    field :anonymous_uuid, :string
+    field :is_anonymous, :boolean, default: false
+    field :last_active_at, :utc_datetime
 
     timestamps(type: :utc_datetime)
   end
@@ -158,5 +161,35 @@ defmodule FoodTracker.Accounts.User do
     else
       add_error(changeset, :current_password, "is not valid")
     end
+  end
+
+  @doc """
+  A changeset for creating anonymous users.
+  """
+  def anonymous_user_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:anonymous_uuid, :is_anonymous, :last_active_at])
+    |> validate_required([:anonymous_uuid, :is_anonymous])
+    |> unique_constraint(:anonymous_uuid)
+  end
+
+  @doc """
+  A changeset for updating the last_active_at timestamp.
+  """
+  def last_active_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:last_active_at])
+    |> validate_required([:last_active_at])
+  end
+
+  @doc """
+  A changeset for converting an anonymous user to a registered user.
+  """
+  def convert_anonymous_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:email, :password])
+    |> validate_email([])
+    |> validate_password([])
+    |> put_change(:is_anonymous, false)
   end
 end

@@ -17,8 +17,29 @@ defmodule FoodTracker.AccountsFixtures do
   def user_fixture(attrs \\ %{}) do
     {:ok, user} =
       attrs
-      |> valid_user_attributes()
+      |> Enum.into(%{
+        email: unique_user_email(),
+        password: valid_user_password()
+      })
       |> FoodTracker.Accounts.register_user()
+
+    user
+  end
+
+  @doc """
+  Generate an anonymous user.
+  """
+  def anonymous_user_fixture(attrs \\ %{}) do
+    anonymous_uuid = Ecto.UUID.generate()
+
+    {:ok, user} =
+      attrs
+      |> Enum.into(%{
+        anonymous_uuid: anonymous_uuid,
+        is_anonymous: true,
+        last_active_at: DateTime.utc_now() |> DateTime.truncate(:second)
+      })
+      |> FoodTracker.Accounts.create_anonymous_user()
 
     user
   end

@@ -355,4 +355,108 @@ defmodule FoodTracker.Accounts do
     user = Repo.get!(User, user_id)
     Repo.delete(user)
   end
+
+  @doc """
+  Creates an anonymous user with the given attributes.
+
+  ## Examples
+
+      iex> create_anonymous_user(%{anonymous_uuid: "some-uuid"})
+      {:ok, %User{}}
+
+  """
+  def create_anonymous_user(attrs) do
+    %User{}
+    |> User.anonymous_user_changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Gets or creates an anonymous user with the given UUID.
+  If the user exists, updates the last_active_at timestamp.
+
+  ## Examples
+
+      iex> get_or_create_anonymous_user("some-uuid")
+      {:ok, %User{}}
+
+  """
+  def get_or_create_anonymous_user(anonymous_uuid) do
+    case Repo.get_by(User, anonymous_uuid: anonymous_uuid) do
+      nil ->
+        create_anonymous_user(%{
+          anonymous_uuid: anonymous_uuid,
+          is_anonymous: true,
+          last_active_at: DateTime.utc_now() |> DateTime.truncate(:second)
+        })
+
+      user ->
+        # Update last_active_at timestamp
+        {:ok, user} =
+          user
+          |> User.anonymous_user_changeset(%{
+            last_active_at: DateTime.utc_now() |> DateTime.truncate(:second)
+          })
+          |> Repo.update()
+
+        {:ok, user}
+    end
+  end
+
+  @doc """
+  Updates the last_active_at timestamp for a user.
+
+  ## Examples
+
+      iex> update_user_last_active(user)
+      {:ok, %User{}}
+
+  """
+  def update_user_last_active(user) do
+    user
+    |> User.last_active_changeset(%{
+      last_active_at: DateTime.utc_now() |> DateTime.truncate(:second)
+    })
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes inactive anonymous users that haven't been active for the specified
+  number of days.
+
+  ## Examples
+
+      iex> delete_inactive_anonymous_users(30)
+      {5, nil}
+
+  """
+  def delete_inactive_anonymous_users(days_threshold) do
+    threshold_date =
+      DateTime.utc_now()
+      |> DateTime.add(-days_threshold * 24 * 60 * 60, :second)
+      |> DateTime.truncate(:second)
+
+    query =
+      from u in User,
+        where:
+          u.is_anonymous == true and
+            (u.last_active_at < ^threshold_date or is_nil(u.last_active_at))
+
+    Repo.delete_all(query)
+  end
+
+  @doc """
+  Converts an anonymous user to a registered user.
+
+  ## Examples
+
+      iex> convert_anonymous_to_registered(user, %{email: "user@example.com", password: "password"})
+      {:ok, %User{}}
+
+  """
+  def convert_anonymous_to_registered(user, attrs) do
+    user
+    |> User.convert_anonymous_changeset(attrs)
+    |> Repo.update()
+  end
 end

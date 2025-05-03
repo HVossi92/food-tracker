@@ -17,7 +17,7 @@ Demo: https://munchmetrics.vossihub.org/
 
 The goal is to allow users to try out the app without registration, only prompting them to create an account after they start saving food tracks.
 
-### Phase 1: Preparation and Testing (Current Focus)
+### Phase 1: Preparation and Testing (✓ Completed)
 
 1. **Fix Existing Tests**
 
@@ -26,18 +26,18 @@ The goal is to allow users to try out the app without registration, only prompti
 
 2. **Design Database Changes**
 
-   - Add `anonymous_uuid` field to users table
-   - Add `is_anonymous` boolean field to users table
-   - Add `last_active_at` timestamp field to users table
-   - Create database migration
+   - [x] Add `anonymous_uuid` field to users table
+   - [x] Add `is_anonymous` boolean field to users table
+   - [x] Add `last_active_at` timestamp field to users table
+   - [x] Create database migration
 
 3. **Write New Tests**
-   - Test anonymous user creation
-   - Test anonymous user to registered user conversion
-   - Test inactive anonymous user cleanup
-   - Test session preservation during conversion
+   - [x] Test anonymous user creation
+   - [x] Test anonymous user to registered user conversion
+   - [x] Test inactive anonymous user cleanup
+   - [x] Test session preservation during conversion
 
-### Phase 2: Core Implementation
+### Phase 2: Core Implementation (Current Focus)
 
 4. **Update Authentication System**
 
@@ -45,17 +45,20 @@ The goal is to allow users to try out the app without registration, only prompti
    - Create anonymous user module and plug
    - Implement anonymous user tracking via cookies
    - Update LiveView hooks to handle anonymous users
+   - Make sure we have test coverage for the new changes
 
 5. **Track Anonymous Users**
 
    - Set cookie with UUID for anonymous users
    - Create anonymous user accounts when saving first food track
    - Update last_active_at on each page visit
+   - Make sure we have test coverage for the new changes
 
 6. **User Conversion Workflow**
    - Add functionality to convert anonymous users to registered users
    - Preserve existing food tracking data during conversion
    - Update email confirmation process to handle anonymous users
+   - Make sure we have test coverage for the new changes
 
 ### Phase 3: UI and Cleanup
 
@@ -64,16 +67,19 @@ The goal is to allow users to try out the app without registration, only prompti
    - Add persistent banner for anonymous users
    - Show clear notification about data persistence limitations
    - Provide easy path to registration
+   - Make sure we have test coverage for the new changes
 
 8. **Implement Cleanup Job**
 
    - Create periodic task to clean up inactive anonymous accounts
    - Set up 30-day inactivity threshold matching cookie duration
    - Add logging for account cleanup
+   - Make sure we have test coverage for the new changes
 
 9. **Update Privacy and Terms**
    - Update privacy policy to address anonymous user data
    - Document data retention policies for anonymous accounts
+   - Make sure we have test coverage for the new changes
 
 ### Phase 4: Testing and Launch
 
@@ -82,11 +88,6 @@ The goal is to allow users to try out the app without registration, only prompti
     - Verify all user flows (anonymous → registered)
     - Test edge cases for authentication
     - Test data persistence through conversion
-
-11. **Deploy and Monitor**
-    - Deploy changes
-    - Monitor anonymous user conversion rates
-    - Track any issues with database performance
 
 ## For Users
 

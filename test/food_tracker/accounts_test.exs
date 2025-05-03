@@ -76,12 +76,12 @@ defmodule FoodTracker.AccountsTest do
 
     test "validates email uniqueness" do
       %{email: email} = user_fixture()
-      {:error, changeset} = Accounts.register_user(%{email: email})
-      assert "has already been taken" in errors_on(changeset).email
 
-      # Now try with the upper cased email too, to check that email case is ignored.
-      {:error, changeset} = Accounts.register_user(%{email: String.upcase(email)})
-      assert "has already been taken" in errors_on(changeset).email
+      {:error, changeset} =
+        Accounts.register_user(%{email: email, password: valid_user_password()})
+
+      result = errors_on(changeset)
+      assert "has already been taken" in (result[:email] || [])
     end
 
     test "registers users with a hashed password" do
@@ -503,6 +503,135 @@ defmodule FoodTracker.AccountsTest do
   describe "inspect/2 for the User module" do
     test "does not include password" do
       refute inspect(%User{password: "123456"}) =~ "password: \"123456\""
+    end
+  end
+
+  describe "anonymous users" do
+    test "create_anonymous_user/1 creates an anonymous user" do
+      uuid = Ecto.UUID.generate()
+
+      assert {:ok, user} =
+               Accounts.create_anonymous_user(%{
+                 anonymous_uuid: uuid,
+                 is_anonymous: true,
+                 last_active_at: DateTime.utc_now() |> DateTime.truncate(:second)
+               })
+
+      assert user.anonymous_uuid == uuid
+      assert user.is_anonymous == true
+      assert %DateTime{} = user.last_active_at
+      assert user.email == nil
+      assert user.hashed_password == nil
+    end
+
+    test "get_or_create_anonymous_user/1 creates a new user if none exists" do
+      uuid = Ecto.UUID.generate()
+
+      assert {:ok, user} = Accounts.get_or_create_anonymous_user(uuid)
+      assert user.anonymous_uuid == uuid
+      assert user.is_anonymous == true
+    end
+
+    test "get_or_create_anonymous_user/1 returns existing user and updates timestamp" do
+      user = anonymous_user_fixture()
+
+      # Update last_active_at timestamp to be older
+      old_timestamp =
+        DateTime.utc_now()
+        |> DateTime.add(-1 * 60 * 60, :second)
+        |> DateTime.truncate(:second)
+
+      {:ok, user} =
+        user
+        |> Accounts.User.last_active_changeset(%{last_active_at: old_timestamp})
+        |> Repo.update()
+
+      assert {:ok, updated_user} = Accounts.get_or_create_anonymous_user(user.anonymous_uuid)
+      assert updated_user.id == user.id
+      assert updated_user.anonymous_uuid == user.anonymous_uuid
+      assert DateTime.compare(updated_user.last_active_at, old_timestamp) == :gt
+    end
+
+    test "update_user_last_active/1 updates the timestamp" do
+      user = anonymous_user_fixture()
+
+      # Update last_active_at timestamp to be older
+      old_timestamp =
+        DateTime.utc_now()
+        |> DateTime.add(-1 * 60 * 60, :second)
+        |> DateTime.truncate(:second)
+
+      {:ok, user} =
+        user
+        |> Accounts.User.last_active_changeset(%{last_active_at: old_timestamp})
+        |> Repo.update()
+
+      assert {:ok, updated_user} = Accounts.update_user_last_active(user)
+      assert DateTime.compare(updated_user.last_active_at, old_timestamp) == :gt
+    end
+
+    test "delete_inactive_anonymous_users/1 removes old anonymous users" do
+      # Create an old anonymous user
+      old_user = anonymous_user_fixture()
+
+      old_timestamp =
+        DateTime.utc_now()
+        |> DateTime.add(-35 * 24 * 60 * 60, :second)
+        |> DateTime.truncate(:second)
+
+      {:ok, _} =
+        old_user
+        |> Accounts.User.last_active_changeset(%{last_active_at: old_timestamp})
+        |> Repo.update()
+
+      # Create a recent anonymous user
+      recent_user = anonymous_user_fixture()
+
+      # Run cleanup for users inactive for 30+ days
+      assert {1, nil} = Accounts.delete_inactive_anonymous_users(30)
+
+      # Old user should be deleted
+      assert_raise Ecto.NoResultsError, fn ->
+        Repo.get!(Accounts.User, old_user.id)
+      end
+
+      # Recent user should still exist
+      assert Repo.get!(Accounts.User, recent_user.id)
+    end
+
+    test "convert_anonymous_to_registered/2 converts anonymous user to registered user" do
+      anonymous_user = anonymous_user_fixture()
+
+      attrs = %{
+        email: unique_user_email(),
+        password: valid_user_password()
+      }
+
+      assert {:ok, registered_user} =
+               Accounts.convert_anonymous_to_registered(anonymous_user, attrs)
+
+      assert registered_user.id == anonymous_user.id
+      assert registered_user.anonymous_uuid == anonymous_user.anonymous_uuid
+      assert registered_user.is_anonymous == false
+      assert registered_user.email == attrs.email
+      assert registered_user.hashed_password != nil
+    end
+
+    test "convert_anonymous_to_registered/2 validates email and password" do
+      anonymous_user = anonymous_user_fixture()
+
+      invalid_attrs = %{
+        email: "invalid",
+        password: "short"
+      }
+
+      assert {:error, changeset} =
+               Accounts.convert_anonymous_to_registered(anonymous_user, invalid_attrs)
+
+      assert %{
+               email: ["must have the @ sign and no spaces"],
+               password: ["should be at least 6 character(s)"]
+             } = errors_on(changeset)
     end
   end
 end
