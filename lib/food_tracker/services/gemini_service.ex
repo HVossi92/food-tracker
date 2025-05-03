@@ -108,7 +108,7 @@ defmodule FoodTracker.Services.GeminiService do
     end
   end
 
-  defp process_response(body, unit) do
+  defp process_response(body, _) do
     IO.inspect(body, label: "Body")
 
     case Jason.decode(body) do

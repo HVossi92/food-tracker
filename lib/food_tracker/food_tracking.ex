@@ -57,14 +57,10 @@ defmodule FoodTracker.FoodTracking do
   """
   def get_food_track!(id), do: Repo.get!(FoodTrack, id)
 
-  @doc """
-  Attempts to get nutrition information from available services.
-  Returns {:ok, nutrition_info} or {:error, reason}
-  """
   defp lookup_nutrition_info(food_name) do
     with {:error, gemini_reason} <- GeminiService.get_nutrition_info(food_name),
          {:error, ollama_reason} <- OllamaService.get_nutrition_info(food_name) do
-      Logger.warn(
+      Logger.warning(
         "Failed to get nutrition info: Gemini: #{gemini_reason}, Ollama: #{ollama_reason}"
       )
 

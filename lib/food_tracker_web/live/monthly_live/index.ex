@@ -51,7 +51,7 @@ defmodule FoodTrackerWeb.MonthlyLive.Index do
   end
 
   @impl true
-  def handle_info({FoodTrackerWeb.Food_TrackLive.FormComponent, {:saved, food__track}}, socket) do
+  def handle_info({FoodTrackerWeb.Food_TrackLive.FormComponent, {:saved, _}}, socket) do
     {:noreply, update_food_tracks(socket)}
   end
 

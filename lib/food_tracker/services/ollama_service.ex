@@ -91,7 +91,7 @@ defmodule FoodTracker.Services.OllamaService do
     |> process_response(unit)
   end
 
-  defp process_response({:ok, response_text}, unit) do
+  defp process_response({:ok, response_text}, _) do
     processed_text =
       response_text
       |> String.trim()
