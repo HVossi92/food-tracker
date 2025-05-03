@@ -6,8 +6,8 @@ defmodule FoodTracker.Food_Tracking.Food_Track do
     field :name, :string
     field :date, :string, default: Date.utc_today() |> Date.to_string()
     field :time, :string, default: Time.utc_now() |> Time.to_string() |> String.slice(0, 5)
-    field :calories, :string, default: ""
-    field :protein, :string, default: ""
+    field :calories, :float, default: -1.0
+    field :protein, :float, default: -1.0
     field :user_id, :integer
 
     timestamps(type: :utc_datetime)

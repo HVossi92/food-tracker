@@ -6,6 +6,7 @@ defmodule FoodTracker.Services.OllamaService do
 
   require Logger
   alias FoodTracker.Services.NutritionInfo
+  alias FoodTracker.Services.TextProcessing
 
   @system_prompt_calories "You are a nutritionist providing estimates for calories in foods. You must only respond with a single number representing the estimated number of kilocalories (kcal) in the given food item. If you don't know, say 'Unknown'. Always respond with a number, do not respond with your thinking steps."
   @system_prompt_protein "You are a nutritionist providing estimates for protein content in foods. You must only respond with a single number representing the estimated grams of protein in the given food item. If you don't know, say 'Unknown'. Always respond with a number, do not respond with your thinking steps."
@@ -92,21 +93,18 @@ defmodule FoodTracker.Services.OllamaService do
   end
 
   defp process_response({:ok, response_text}, _) do
-    processed_text =
-      response_text
-      |> String.trim()
-      |> remove_thinking_parts()
+    processed_value = TextProcessing.extract_numbers(response_text)
 
-    {:ok, processed_text}
+    IO.puts(">>>>>>>> process_response result: #{processed_value}")
+
+    if processed_value == -1.0 do
+      {:error, "Ollama could not provide a numeric answer"}
+    else
+      {:ok, processed_value}
+    end
   end
 
   defp process_response({:error, reason}, _unit) do
     {:error, reason}
-  end
-
-  defp remove_thinking_parts(text) do
-    # Strip out everything between <think> and </think>
-    Regex.replace(~r/<think>.*?<\/think>/s, text, "")
-    |> String.trim()
   end
 end

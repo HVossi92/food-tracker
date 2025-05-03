@@ -103,10 +103,14 @@
       <:col :let={{_id, food__track}} label="Date">{food__track.date}</:col>
       <:col :let={{_id, food__track}} label="Time">{food__track.time}</:col>
       <:col :let={{_id, food__track}} label="Calories (kcal)">
-        {food__track.calories}
+        {if food__track.calories == -1.0,
+          do: "Unavailable",
+          else: food__track.calories}
       </:col>
       <:col :let={{_id, food__track}} label="Protein (g)">
-        {food__track.protein}
+        {if food__track.protein == -1.0,
+          do: "Unavailable",
+          else: food__track.protein}
       </:col>
       <:action :let={{id, food__track}}>
         <div class="flex space-x-3">

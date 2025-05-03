@@ -75,8 +75,6 @@ defmodule FoodTracker.Food_Tracking do
     attrs =
       case nutrition_result do
         {:ok, nutrition_info} ->
-          IO.inspect(nutrition_info, label: "Nutrition information")
-
           attrs
           |> Map.put("calories", nutrition_info.calories)
           |> Map.put("protein", nutrition_info.protein)
@@ -101,8 +99,8 @@ defmodule FoodTracker.Food_Tracking do
 
               # Both services failed, set default values
               attrs
-              |> Map.put("calories", "Unavailable")
-              |> Map.put("protein", "Unavailable")
+              |> Map.put("calories", -1.0)
+              |> Map.put("protein", -1.0)
           end
       end
 

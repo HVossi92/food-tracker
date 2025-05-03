@@ -6,6 +6,7 @@ defmodule FoodTracker.Services.GeminiService do
 
   require Logger
   alias FoodTracker.Services.NutritionInfo
+  alias FoodTracker.Services.TextProcessing
 
   @system_prompt_calories "You are a nutritionist providing estimates for calories in foods. You must only respond with a single number representing the estimated number of kilocalories (kcal) in the given food item. If you don't know, say 'Unknown'. Always respond with a number, do not respond with your thinking steps."
   @system_prompt_protein "You are a nutritionist providing estimates for protein content in foods. You must only respond with a single number representing the estimated grams of protein in the given food item. If you don't know, say 'Unknown'. Always respond with a number, do not respond with your thinking steps."
@@ -115,15 +116,12 @@ defmodule FoodTracker.Services.GeminiService do
       {:ok, decoded} ->
         case decoded do
           %{"candidates" => [%{"content" => %{"parts" => [%{"text" => text} | _]}} | _]} ->
-            cleaned_text =
-              text
-              |> String.trim()
-              |> remove_thinking_parts()
+            cleaned_value = TextProcessing.extract_numbers(text)
 
-            if String.downcase(cleaned_text) == "unknown" do
-              {:error, "Gemini does not know the answer: #{cleaned_text}"}
+            if cleaned_value == -1.0 do
+              {:error, "Gemini could not provide a numeric answer"}
             else
-              {:ok, cleaned_text}
+              {:ok, cleaned_value}
             end
 
           _ ->
@@ -133,11 +131,5 @@ defmodule FoodTracker.Services.GeminiService do
       {:error, reason} ->
         {:error, "Could not decode JSON response: #{inspect(reason)}"}
     end
-  end
-
-  defp remove_thinking_parts(text) do
-    # Strip out everything between <think> and </think>
-    Regex.replace(~r/<think>.*?<\/think>/s, text, "")
-    |> String.trim()
   end
 end

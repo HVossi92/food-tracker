@@ -4,8 +4,8 @@ defmodule FoodTracker.Services.NutritionInfo do
   """
 
   @type t :: %__MODULE__{
-          calories: String.t(),
-          protein: String.t()
+          calories: float(),
+          protein: float()
         }
 
   defstruct [:calories, :protein]
