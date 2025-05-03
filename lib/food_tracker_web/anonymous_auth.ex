@@ -22,6 +22,8 @@ defmodule FoodTrackerWeb.AnonymousAuth do
       if anonymous_uuid do
         # Get or create anonymous user
         {:ok, anonymous_user} = Accounts.get_or_create_anonymous_user(anonymous_uuid)
+        # Store the anonymous_uuid in the session for LiveView
+        conn = put_session(conn, "anonymous_uuid", anonymous_uuid)
         assign(conn, :anonymous_user, anonymous_user)
       else
         assign(conn, :anonymous_user, nil)
@@ -57,6 +59,7 @@ defmodule FoodTrackerWeb.AnonymousAuth do
       # Set the cookie and assign the user
       conn
       |> put_resp_cookie(@anonymous_cookie, anonymous_uuid, @anonymous_cookie_options)
+      |> put_session("anonymous_uuid", anonymous_uuid)
       |> assign(:anonymous_user, anonymous_user)
     else
       conn
@@ -136,10 +139,10 @@ defmodule FoodTrackerWeb.AnonymousAuth do
     socket = mount_anonymous_user(socket_with_user, session)
 
     # Allow access if either is present
-    if socket.assigns.current_user || socket.assigns.anonymous_user do
+    if socket.assigns.current_user || socket.assigns[:anonymous_user] do
       {:cont, socket}
     else
-      # Create a new anonymous user if neither exists
+      # Create a new anonymous user since none exists
       anonymous_uuid = Ecto.UUID.generate()
 
       {:ok, anonymous_user} =
@@ -149,7 +152,14 @@ defmodule FoodTrackerWeb.AnonymousAuth do
           last_active_at: DateTime.utc_now() |> DateTime.truncate(:second)
         })
 
-      socket = Phoenix.Component.assign(socket, :anonymous_user, anonymous_user)
+      # Push event to set the cookie for this newly created user
+      socket =
+        socket
+        |> Phoenix.Component.assign(:anonymous_user, anonymous_user)
+        |> Phoenix.LiveView.push_event("set-anonymous-cookie", %{
+          "anonymous_uuid" => anonymous_uuid,
+          "set_anonymous_cookie" => true
+        })
 
       {:cont, socket}
     end

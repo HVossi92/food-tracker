@@ -90,19 +90,32 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
 
   @impl true
   def handle_info({FoodTrackerWeb.Food_TrackLive.FormComponent, {:saved, food__track}}, socket) do
-    # After saving a new food track, refresh the daily totals
-    user_id = get_user_id(socket)
-    date_string = food__track.date
-
-    # Get updated totals
     %{food_tracks: food_tracks, calories: total_calories, protein: total_protein} =
-      Food_Tracking.list_food_tracks_on(date_string, user_id)
+      Food_Tracking.list_food_tracks_on(food__track.date, get_user_id(socket))
 
     socket =
       socket
       |> assign(:total_calories, total_calories)
       |> assign(:total_protein, total_protein)
-      |> stream_insert(:food_tracks, food__track)
+      |> stream(:food_tracks, [], reset: true)
+      |> stream(:food_tracks, food_tracks)
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info({:set_anonymous_cookie, token}, socket) do
+    # Forward the token to the client to set the cookie
+    {:noreply, push_event(socket, "set-anonymous-cookie", token)}
+  end
+
+  @impl true
+  def handle_info({:assign_anonymous_user, anonymous_user}, socket) do
+    # Assign the anonymous user to the socket and update the banner
+    socket =
+      socket
+      |> assign(:anonymous_user, anonymous_user)
+      |> maybe_assign_anonymous_banner()
 
     {:noreply, socket}
   end
@@ -202,9 +215,39 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
   # Get user ID from either current_user or anonymous_user
   defp get_user_id(socket) do
     cond do
-      socket.assigns[:current_user] -> socket.assigns.current_user.id
-      socket.assigns[:anonymous_user] -> socket.assigns.anonymous_user.id
-      true -> raise "No user found in socket assigns"
+      socket.assigns[:current_user] ->
+        socket.assigns.current_user.id
+
+      socket.assigns[:anonymous_user] ->
+        socket.assigns.anonymous_user.id
+
+      true ->
+        # If we get here, something went wrong with the anonymous auth system
+        # This is a fallback that should rarely be needed if our auth system is working correctly
+        # Create a temporary anonymous user on the fly
+        anonymous_uuid = Ecto.UUID.generate()
+
+        {:ok, anonymous_user} =
+          FoodTracker.Accounts.create_anonymous_user(%{
+            anonymous_uuid: anonymous_uuid,
+            is_anonymous: true,
+            last_active_at: DateTime.utc_now() |> DateTime.truncate(:second)
+          })
+
+        # Send a message to ourselves to set the cookie in the next tick
+        send(
+          self(),
+          {:set_anonymous_cookie,
+           %{
+             "anonymous_uuid" => anonymous_uuid,
+             "set_anonymous_cookie" => true
+           }}
+        )
+
+        # Also assign the user to the socket so we don't hit this again
+        Process.send_after(self(), {:assign_anonymous_user, anonymous_user}, 0)
+
+        anonymous_user.id
     end
   end
 

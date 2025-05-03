@@ -23,6 +23,9 @@ defmodule FoodTrackerWeb.Router do
   scope "/", FoodTrackerWeb do
     pipe_through :browser
 
+    # Add a route for setting the anonymous cookie
+    get "/set-anonymous-cookie", CookieController, :set_anonymous_cookie
+
     live_session :public_or_authenticated,
       on_mount: [{FoodTrackerWeb.AnonymousAuth, :ensure_authenticated_or_anonymous}] do
       live "/", Food_TrackLive.Index, :index

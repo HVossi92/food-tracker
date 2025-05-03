@@ -2,13 +2,17 @@ defmodule FoodTrackerWeb.Food_TrackLive.FormComponent do
   use FoodTrackerWeb, :live_component
 
   alias FoodTracker.Food_Tracking
+  alias FoodTracker.Accounts
 
   @impl true
   def render(assigns) do
+    assigns = assign_new(assigns, :subtitle, fn -> nil end)
+
     ~H"""
     <div>
       <.header>
         {@title}
+        <:subtitle :if={@subtitle}>{@subtitle}</:subtitle>
       </.header>
 
       <.simple_form
@@ -22,7 +26,7 @@ defmodule FoodTrackerWeb.Food_TrackLive.FormComponent do
         <.input field={@form[:date]} type="date" label="Date" />
         <.input field={@form[:time]} type="time" label="Time" />
         <:actions>
-          <.button phx-disable-with="Saving...">Save Food track</.button>
+          <.button phx-disable-with="Saving...">Save Food Log</.button>
         </:actions>
       </.simple_form>
     </div>
@@ -31,19 +35,22 @@ defmodule FoodTrackerWeb.Food_TrackLive.FormComponent do
 
   @impl true
   def update(%{food__track: food__track} = assigns, socket) do
-    # Handle nil values by providing a default empty struct
-    food__track = food__track || %FoodTracker.Food_Tracking.Food_Track{}
+    changeset = Food_Tracking.change_food__track(food__track)
 
     {:ok,
      socket
      |> assign(assigns)
-     |> assign(:form, to_form(Food_Tracking.change_food__track(food__track)))}
+     |> assign_form(changeset)}
   end
 
   @impl true
   def handle_event("validate", %{"food__track" => food__track_params}, socket) do
-    changeset = Food_Tracking.change_food__track(socket.assigns.food__track, food__track_params)
-    {:noreply, assign(socket, form: to_form(changeset, action: :validate))}
+    changeset =
+      socket.assigns.food__track
+      |> Food_Tracking.change_food__track(food__track_params)
+      |> Map.put(:action, :validate)
+
+    {:noreply, assign_form(socket, changeset)}
   end
 
   def handle_event("save", %{"food__track" => food__track_params}, socket) do
@@ -65,14 +72,15 @@ defmodule FoodTrackerWeb.Food_TrackLive.FormComponent do
          |> push_patch(to: socket.assigns.patch)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        {:noreply, assign(socket, form: to_form(changeset))}
+        {:noreply, assign_form(socket, changeset)}
     end
   end
 
   defp save_food__track(socket, :new, food__track_params) do
-    # Add the current user's ID to the food track params
-    # Works with both registered and anonymous users
-    user_id = socket.assigns.current_user.id
+    # If we don't have a current user or anonymous user yet, create an anonymous user
+    {user_id, socket} = ensure_user_exists(socket)
+
+    # Add the user's ID to the food track params
     food__track_params = Map.put(food__track_params, "user_id", user_id)
 
     case Food_Tracking.create_food__track(food__track_params) do
@@ -85,7 +93,48 @@ defmodule FoodTrackerWeb.Food_TrackLive.FormComponent do
          |> push_patch(to: socket.assigns.patch)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        {:noreply, assign(socket, form: to_form(changeset))}
+        {:noreply, assign_form(socket, changeset)}
+    end
+  end
+
+  # Helper function to assign the form to the socket
+  defp assign_form(socket, %Ecto.Changeset{} = changeset) do
+    assign(socket, :form, to_form(changeset))
+  end
+
+  # Ensure a user exists (either current_user or anonymous_user)
+  defp ensure_user_exists(socket) do
+    cond do
+      socket.assigns[:current_user] ->
+        {socket.assigns.current_user.id, socket}
+
+      socket.assigns[:anonymous_user] ->
+        {socket.assigns.anonymous_user.id, socket}
+
+      true ->
+        # Create a new anonymous user
+        anonymous_uuid = Ecto.UUID.generate()
+
+        {:ok, anonymous_user} =
+          Accounts.create_anonymous_user(%{
+            anonymous_uuid: anonymous_uuid,
+            is_anonymous: true,
+            last_active_at: DateTime.utc_now() |> DateTime.truncate(:second)
+          })
+
+        # Send event to set cookie in client
+        token = %{
+          "anonymous_uuid" => anonymous_uuid,
+          "set_anonymous_cookie" => true
+        }
+
+        # Push event to parent LiveView to set the cookie
+        send(self(), {:set_anonymous_cookie, token})
+
+        # Update socket with the new anonymous user
+        socket = assign(socket, :anonymous_user, anonymous_user)
+
+        {anonymous_user.id, socket}
     end
   end
 

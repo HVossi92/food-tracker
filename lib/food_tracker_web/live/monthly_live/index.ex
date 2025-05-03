@@ -183,10 +183,51 @@ defmodule FoodTrackerWeb.MonthlyLive.Index do
   # Get user ID from either current_user or anonymous_user
   defp get_user_id(socket) do
     cond do
-      socket.assigns[:current_user] -> socket.assigns.current_user.id
-      socket.assigns[:anonymous_user] -> socket.assigns.anonymous_user.id
-      true -> raise "No user found in socket assigns"
+      socket.assigns[:current_user] ->
+        socket.assigns.current_user.id
+
+      socket.assigns[:anonymous_user] ->
+        socket.assigns.anonymous_user.id
+
+      true ->
+        # If we get here, something went wrong with the anonymous auth system
+        # This is a fallback that should rarely be needed if our auth system is working correctly
+        # Create a temporary anonymous user on the fly
+        anonymous_uuid = Ecto.UUID.generate()
+
+        {:ok, anonymous_user} =
+          FoodTracker.Accounts.create_anonymous_user(%{
+            anonymous_uuid: anonymous_uuid,
+            is_anonymous: true,
+            last_active_at: DateTime.utc_now() |> DateTime.truncate(:second)
+          })
+
+        # Send a message to ourselves to set the cookie in the next tick
+        send(
+          self(),
+          {:set_anonymous_cookie,
+           %{
+             "anonymous_uuid" => anonymous_uuid,
+             "set_anonymous_cookie" => true
+           }}
+        )
+
+        # Also assign the user to the socket so we don't hit this again
+        Process.send_after(self(), {:assign_anonymous_user, anonymous_user}, 0)
+
+        anonymous_user.id
     end
+  end
+
+  @impl true
+  def handle_info({:assign_anonymous_user, anonymous_user}, socket) do
+    # Assign the anonymous user to the socket and update the banner
+    socket =
+      socket
+      |> assign(:anonymous_user, anonymous_user)
+      |> maybe_assign_anonymous_banner()
+
+    {:noreply, socket}
   end
 
   # Add a banner for anonymous users
@@ -196,5 +237,11 @@ defmodule FoodTrackerWeb.MonthlyLive.Index do
     else
       assign(socket, :anonymous_banner, false)
     end
+  end
+
+  @impl true
+  def handle_info({:set_anonymous_cookie, token}, socket) do
+    # Forward the token to the client to set the cookie
+    {:noreply, push_event(socket, "set-anonymous-cookie", token)}
   end
 end

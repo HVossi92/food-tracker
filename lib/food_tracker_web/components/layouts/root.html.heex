@@ -11,7 +11,11 @@
     <script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"}>
     </script>
   </head>
-  <body class="bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-200 flex flex-col">
+  <body
+    class="bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-200 flex flex-col"
+    id="anonymous-cookie-container"
+    phx-hook="AnonymousCookie"
+  >
     {@inner_content}
   </body>
 </html>

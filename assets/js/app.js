@@ -22,8 +22,29 @@ import { Socket } from "phoenix"
 import { LiveSocket } from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 
+// Define hooks
+const Hooks = {}
+
+// Hook to handle redirection to cookie setting endpoint
+Hooks.AnonymousCookie = {
+  mounted() {
+    this.handleEvent("set-anonymous-cookie", (data) => {
+      if (data.set_anonymous_cookie && data.anonymous_uuid) {
+        // Store the UUID in localStorage as a fallback
+        localStorage.setItem('anonymous_uuid', data.anonymous_uuid);
+
+        // Redirect to the cookie-setting endpoint which will set the signed cookie
+        // and then redirect back to the current page
+        const currentPath = window.location.pathname;
+        window.location.href = `/set-anonymous-cookie?uuid=${data.anonymous_uuid}&return_to=${encodeURIComponent(currentPath)}`;
+      }
+    });
+  }
+}
+
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 let liveSocket = new LiveSocket("/live", Socket, {
+  hooks: Hooks,
   longPollFallbackMs: 2500,
   params: { _csrf_token: csrfToken }
 })
