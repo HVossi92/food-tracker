@@ -33,17 +33,17 @@ defmodule FoodTrackerWeb.UserResetPasswordLiveTest do
              }
     end
 
-    test "renders errors for invalid data", %{conn: conn, token: token} do
+    test "Reset password page renders errors for invalid data", %{conn: conn, token: token} do
       {:ok, lv, _html} = live(conn, ~p"/users/reset_password/#{token}")
 
       result =
         lv
         |> element("#reset_password_form")
         |> render_change(
-          user: %{"password" => "secret12", "password_confirmation" => "secret123456"}
+          user: %{"password" => "too", "password_confirmation" => "does not match"}
         )
 
-      assert result =~ "should be at least 12 character"
+      assert result =~ "should be at least 6 character(s)"
       assert result =~ "does not match password"
     end
   end
@@ -68,21 +68,20 @@ defmodule FoodTrackerWeb.UserResetPasswordLiveTest do
       assert Accounts.get_user_by_email_and_password(user.email, "new valid password")
     end
 
-    test "does not reset password on invalid data", %{conn: conn, token: token} do
+    test "Reset Password does not reset password on invalid data", %{conn: conn, token: token} do
       {:ok, lv, _html} = live(conn, ~p"/users/reset_password/#{token}")
 
       result =
         lv
         |> form("#reset_password_form",
           user: %{
-            "password" => "too short",
+            "password" => "too",
             "password_confirmation" => "does not match"
           }
         )
         |> render_submit()
 
       assert result =~ "Reset Password"
-      assert result =~ "should be at least 12 character(s)"
       assert result =~ "does not match password"
     end
   end

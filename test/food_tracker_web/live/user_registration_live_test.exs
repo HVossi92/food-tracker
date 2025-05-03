@@ -22,17 +22,19 @@ defmodule FoodTrackerWeb.UserRegistrationLiveTest do
       assert {:ok, _conn} = result
     end
 
-    test "renders errors for invalid data", %{conn: conn} do
+    test "Registration page renders errors for invalid data", %{conn: conn} do
       {:ok, lv, _html} = live(conn, ~p"/users/register")
 
       result =
         lv
-        |> element("#registration_form")
-        |> render_change(user: %{"email" => "with spaces", "password" => "too short"})
+        |> form("#registration_form",
+          user: %{email: "with spaces", password: "too"}
+        )
+        |> render_submit()
 
-      assert result =~ "Register"
+      assert result =~ "Register for an account"
       assert result =~ "must have the @ sign and no spaces"
-      assert result =~ "should be at least 12 character"
+      assert result =~ "should be at least 6 character"
     end
   end
 

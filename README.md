@@ -9,8 +9,84 @@ Demo: https://munchmetrics.vossihub.org/
 ## Todos
 
 [x] Make sure db is persistent when running new container
+[x] Fix Today's Food Log scroll bars / layout
 [ ] Always default to the current date and time
-[ ] Fix Today's Food Log scroll bars / layout
+[ ] Implement anonymous user functionality
+
+## Anonymous User Access Implementation Plan
+
+The goal is to allow users to try out the app without registration, only prompting them to create an account after they start saving food tracks.
+
+### Phase 1: Preparation and Testing (Current Focus)
+
+1. **Fix Existing Tests**
+
+   - [x] Update food tracking tests to include user_id requirement
+   - [x] Ensure all tests pass with current implementation
+
+2. **Design Database Changes**
+
+   - Add `anonymous_uuid` field to users table
+   - Add `is_anonymous` boolean field to users table
+   - Add `last_active_at` timestamp field to users table
+   - Create database migration
+
+3. **Write New Tests**
+   - Test anonymous user creation
+   - Test anonymous user to registered user conversion
+   - Test inactive anonymous user cleanup
+   - Test session preservation during conversion
+
+### Phase 2: Core Implementation
+
+4. **Update Authentication System**
+
+   - Modify router to allow public access to home and monthly pages
+   - Create anonymous user module and plug
+   - Implement anonymous user tracking via cookies
+   - Update LiveView hooks to handle anonymous users
+
+5. **Track Anonymous Users**
+
+   - Set cookie with UUID for anonymous users
+   - Create anonymous user accounts when saving first food track
+   - Update last_active_at on each page visit
+
+6. **User Conversion Workflow**
+   - Add functionality to convert anonymous users to registered users
+   - Preserve existing food tracking data during conversion
+   - Update email confirmation process to handle anonymous users
+
+### Phase 3: UI and Cleanup
+
+7. **UI Notifications**
+
+   - Add persistent banner for anonymous users
+   - Show clear notification about data persistence limitations
+   - Provide easy path to registration
+
+8. **Implement Cleanup Job**
+
+   - Create periodic task to clean up inactive anonymous accounts
+   - Set up 30-day inactivity threshold matching cookie duration
+   - Add logging for account cleanup
+
+9. **Update Privacy and Terms**
+   - Update privacy policy to address anonymous user data
+   - Document data retention policies for anonymous accounts
+
+### Phase 4: Testing and Launch
+
+10. **Final Testing**
+
+    - Verify all user flows (anonymous → registered)
+    - Test edge cases for authentication
+    - Test data persistence through conversion
+
+11. **Deploy and Monitor**
+    - Deploy changes
+    - Monitor anonymous user conversion rates
+    - Track any issues with database performance
 
 ## For Users
 

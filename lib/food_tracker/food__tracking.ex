@@ -81,39 +81,47 @@ defmodule FoodTracker.Food_Tracking do
 
   """
   def create_food__track(attrs \\ %{}) do
-    nutrition_result = GeminiService.get_nutrition_info(attrs["name"])
-
-    # Process the nutrition info based on whether it was successful or not
+    # Skip nutrition API calls in test environment
     attrs =
-      case nutrition_result do
-        {:ok, nutrition_info} ->
-          attrs
-          |> Map.put("calories", nutrition_info.calories)
-          |> Map.put("protein", nutrition_info.protein)
+      if Mix.env() == :test do
+        attrs
+        |> Map.put("calories", -1.0)
+        |> Map.put("protein", -1.0)
+      else
+        # Get nutrition information from APIs
+        nutrition_result = GeminiService.get_nutrition_info(attrs["name"])
 
-        {:error, reason} ->
-          IO.puts("Error getting nutrition info from Gemini: #{reason}")
+        # Process the nutrition info based on whether it was successful or not
+        case nutrition_result do
+          {:ok, nutrition_info} ->
+            attrs
+            |> Map.put("calories", nutrition_info.calories)
+            |> Map.put("protein", nutrition_info.protein)
 
-          # Try Ollama as a fallback
-          IO.puts("Trying Ollama as a fallback...")
-          ollama_result = OllamaService.get_nutrition_info(attrs["name"])
+          {:error, reason} ->
+            IO.puts("Error getting nutrition info from Gemini: #{reason}")
 
-          case ollama_result do
-            {:ok, nutrition_info} ->
-              IO.inspect(nutrition_info, label: "Ollama nutrition information")
+            # Try Ollama as a fallback
+            IO.puts("Trying Ollama as a fallback...")
+            ollama_result = OllamaService.get_nutrition_info(attrs["name"])
 
-              attrs
-              |> Map.put("calories", nutrition_info.calories)
-              |> Map.put("protein", nutrition_info.protein)
+            case ollama_result do
+              {:ok, nutrition_info} ->
+                IO.inspect(nutrition_info, label: "Ollama nutrition information")
 
-            {:error, ollama_reason} ->
-              IO.puts("Error getting nutrition info from Ollama: #{ollama_reason}")
+                attrs
+                |> Map.put("calories", nutrition_info.calories)
+                |> Map.put("protein", nutrition_info.protein)
 
-              # Both services failed, set default values
-              attrs
-              |> Map.put("calories", -1.0)
-              |> Map.put("protein", -1.0)
-          end
+              {:error, ollama_reason} ->
+                IO.puts("Error getting nutrition info from Ollama: #{ollama_reason}")
+
+                # Both services failed, set default values
+                attrs
+                |> Map.put("calories", -1.0)
+                |> Map.put("protein", -1.0)
+            end
+        end
       end
 
     %Food_Track{}

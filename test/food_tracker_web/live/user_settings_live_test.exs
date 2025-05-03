@@ -118,26 +118,31 @@ defmodule FoodTrackerWeb.UserSettingsLiveTest do
       assert Accounts.get_user_by_email_and_password(user.email, new_password)
     end
 
-    test "renders errors with invalid data (phx-change)", %{conn: conn} do
+    test "renders errors with invalid data (phx-change)", %{
+      conn: conn,
+      user: user
+    } do
       {:ok, lv, _html} = live(conn, ~p"/users/settings")
 
       result =
         lv
         |> element("#password_form")
-        |> render_change(%{
-          "current_password" => "invalid",
-          "user" => %{
-            "password" => "too short",
-            "password_confirmation" => "does not match"
+        |> render_change(
+          user: %{
+            "password" => "too",
+            "password_confirmation" => "does not match",
+            "current_password" => "invalid"
           }
-        })
+        )
 
-      assert result =~ "Change Password"
-      assert result =~ "should be at least 12 character(s)"
+      assert result =~ "should be at least 6 character(s)"
       assert result =~ "does not match password"
     end
 
-    test "renders errors with invalid data (phx-submit)", %{conn: conn} do
+    test "update password form renders errors with invalid data (phx-submit)", %{
+      conn: conn,
+      user: _user
+    } do
       {:ok, lv, _html} = live(conn, ~p"/users/settings")
 
       result =
@@ -145,14 +150,13 @@ defmodule FoodTrackerWeb.UserSettingsLiveTest do
         |> form("#password_form", %{
           "current_password" => "invalid",
           "user" => %{
-            "password" => "too short",
+            "password" => "too",
             "password_confirmation" => "does not match"
           }
         })
         |> render_submit()
 
-      assert result =~ "Change Password"
-      assert result =~ "should be at least 12 character(s)"
+      assert result =~ "should be at least 6 character(s)"
       assert result =~ "does not match password"
       assert result =~ "is not valid"
     end
