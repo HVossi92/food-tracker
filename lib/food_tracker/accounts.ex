@@ -372,6 +372,22 @@ defmodule FoodTracker.Accounts do
   end
 
   @doc """
+  Gets an anonymous user by UUID without creating one if it doesn't exist.
+
+  ## Examples
+
+      iex> get_anonymous_user_by_uuid("existing-uuid")
+      %User{}
+
+      iex> get_anonymous_user_by_uuid("non-existing-uuid")
+      nil
+
+  """
+  def get_anonymous_user_by_uuid(anonymous_uuid) do
+    Repo.get_by(User, anonymous_uuid: anonymous_uuid)
+  end
+
+  @doc """
   Gets or creates an anonymous user with the given UUID.
   If the user exists, updates the last_active_at timestamp.
 

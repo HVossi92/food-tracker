@@ -90,8 +90,33 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
 
   @impl true
   def handle_info({FoodTrackerWeb.Food_TrackLive.FormComponent, {:saved, food__track}}, socket) do
+    # First ensure we have the latest anonymous_user from the component if it was just created
+    socket =
+      if is_nil(socket.assigns[:anonymous_user]) && socket.assigns[:current_user] == nil do
+        # This likely means an anonymous user was just created in the form component
+        # Get the anonymous_user from the process dictionary where the form component stored it
+        new_anon_user = Process.get(:new_anonymous_user)
+
+        if new_anon_user do
+          # Clear it from process dictionary
+          Process.put(:new_anonymous_user, nil)
+
+          # Update the socket with the new anonymous user
+          socket
+          |> assign(:anonymous_user, new_anon_user)
+          |> maybe_assign_anonymous_banner()
+        else
+          socket
+        end
+      else
+        socket
+      end
+
+    # Now get the user ID (which will use the newly assigned anonymous user if one was created)
+    user_id = get_user_id(socket)
+
     %{food_tracks: food_tracks, calories: total_calories, protein: total_protein} =
-      Food_Tracking.list_food_tracks_on(food__track.date, get_user_id(socket))
+      Food_Tracking.list_food_tracks_on(food__track.date, user_id)
 
     socket =
       socket
@@ -222,32 +247,9 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
         socket.assigns.anonymous_user.id
 
       true ->
-        # If we get here, something went wrong with the anonymous auth system
-        # This is a fallback that should rarely be needed if our auth system is working correctly
-        # Create a temporary anonymous user on the fly
-        anonymous_uuid = Ecto.UUID.generate()
-
-        {:ok, anonymous_user} =
-          FoodTracker.Accounts.create_anonymous_user(%{
-            anonymous_uuid: anonymous_uuid,
-            is_anonymous: true,
-            last_active_at: DateTime.utc_now() |> DateTime.truncate(:second)
-          })
-
-        # Send a message to ourselves to set the cookie in the next tick
-        send(
-          self(),
-          {:set_anonymous_cookie,
-           %{
-             "anonymous_uuid" => anonymous_uuid,
-             "set_anonymous_cookie" => true
-           }}
-        )
-
-        # Also assign the user to the socket so we don't hit this again
-        Process.send_after(self(), {:assign_anonymous_user, anonymous_user}, 0)
-
-        anonymous_user.id
+        # We don't create an anonymous user here anymore
+        # Return nil to indicate no user exists yet
+        nil
     end
   end
 

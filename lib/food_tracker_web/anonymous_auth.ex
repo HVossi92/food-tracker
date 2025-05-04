@@ -20,11 +20,19 @@ defmodule FoodTrackerWeb.AnonymousAuth do
       {anonymous_uuid, conn} = ensure_anonymous_uuid(conn)
 
       if anonymous_uuid do
-        # Get or create anonymous user
-        {:ok, anonymous_user} = Accounts.get_or_create_anonymous_user(anonymous_uuid)
-        # Store the anonymous_uuid in the session for LiveView
-        conn = put_session(conn, "anonymous_uuid", anonymous_uuid)
-        assign(conn, :anonymous_user, anonymous_user)
+        # Only get existing anonymous user, don't create a new one
+        case Accounts.get_anonymous_user_by_uuid(anonymous_uuid) do
+          %Accounts.User{} = anonymous_user ->
+            # Update last active and store in session
+            {:ok, anonymous_user} = Accounts.update_user_last_active(anonymous_user)
+            # Store the anonymous_uuid in the session for LiveView
+            conn = put_session(conn, "anonymous_uuid", anonymous_uuid)
+            assign(conn, :anonymous_user, anonymous_user)
+
+          nil ->
+            # If UUID cookie exists but user doesn't, assign nil
+            assign(conn, :anonymous_user, nil)
+        end
       else
         assign(conn, :anonymous_user, nil)
       end
@@ -138,40 +146,16 @@ defmodule FoodTrackerWeb.AnonymousAuth do
     # Then mount anonymous user if needed
     socket = mount_anonymous_user(socket_with_user, session)
 
-    # Allow access if either is present
-    if socket.assigns.current_user || socket.assigns[:anonymous_user] do
-      {:cont, socket}
-    else
-      # Create a new anonymous user since none exists
-      anonymous_uuid = Ecto.UUID.generate()
-
-      {:ok, anonymous_user} =
-        Accounts.create_anonymous_user(%{
-          anonymous_uuid: anonymous_uuid,
-          is_anonymous: true,
-          last_active_at: DateTime.utc_now() |> DateTime.truncate(:second)
-        })
-
-      # Push event to set the cookie for this newly created user
-      socket =
-        socket
-        |> Phoenix.Component.assign(:anonymous_user, anonymous_user)
-        |> Phoenix.LiveView.push_event("set-anonymous-cookie", %{
-          "anonymous_uuid" => anonymous_uuid,
-          "set_anonymous_cookie" => true
-        })
-
-      {:cont, socket}
-    end
+    # Allow access whether or not a user is present
+    # We'll no longer create anonymous users at this stage
+    {:cont, socket}
   end
 
   defp mount_anonymous_user(socket, session) do
     Phoenix.Component.assign_new(socket, :anonymous_user, fn ->
       if anonymous_uuid = session["anonymous_uuid"] do
-        case Accounts.get_or_create_anonymous_user(anonymous_uuid) do
-          {:ok, anonymous_user} -> anonymous_user
-          _ -> nil
-        end
+        # Only get existing anonymous user, don't create
+        Accounts.get_anonymous_user_by_uuid(anonymous_uuid)
       else
         nil
       end

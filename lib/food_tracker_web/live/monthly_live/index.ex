@@ -136,27 +136,40 @@ defmodule FoodTrackerWeb.MonthlyLive.Index do
   end
 
   defp get_month_food_tracks(month, year, user_id) do
-    start_date = Date.new!(year, month, 1)
-    end_date = Date.end_of_month(start_date)
+    # Return empty data if user_id is nil
+    if is_nil(user_id) do
+      # Return an empty map with a key for each day of the month
+      start_date = Date.new!(year, month, 1)
+      end_date = Date.end_of_month(start_date)
 
-    date_range = Date.range(start_date, end_date)
+      date_range = Date.range(start_date, end_date)
 
-    # Group food tracks by date
-    date_range
-    |> Enum.reduce(%{}, fn date, acc ->
-      date_string = Utils.date_to_ymd_string(date)
-      # Extract only the food_tracks from the response (which is now a map)
-      result = Food_Tracking.list_food_tracks_on(date_string, user_id)
+      Enum.reduce(date_range, %{}, fn date, acc ->
+        Map.put(acc, date.day, [])
+      end)
+    else
+      start_date = Date.new!(year, month, 1)
+      end_date = Date.end_of_month(start_date)
 
-      food_tracks =
-        case result do
-          %{food_tracks: tracks} -> tracks
-          {:error, _} -> []
-          _ -> []
-        end
+      date_range = Date.range(start_date, end_date)
 
-      Map.put(acc, date.day, food_tracks)
-    end)
+      # Group food tracks by date
+      date_range
+      |> Enum.reduce(%{}, fn date, acc ->
+        date_string = Utils.date_to_ymd_string(date)
+        # Extract only the food_tracks from the response (which is now a map)
+        result = Food_Tracking.list_food_tracks_on(date_string, user_id)
+
+        food_tracks =
+          case result do
+            %{food_tracks: tracks} -> tracks
+            {:error, _} -> []
+            _ -> []
+          end
+
+        Map.put(acc, date.day, food_tracks)
+      end)
+    end
   end
 
   defp previous_month(1, year), do: {year - 1, 12}
@@ -190,32 +203,9 @@ defmodule FoodTrackerWeb.MonthlyLive.Index do
         socket.assigns.anonymous_user.id
 
       true ->
-        # If we get here, something went wrong with the anonymous auth system
-        # This is a fallback that should rarely be needed if our auth system is working correctly
-        # Create a temporary anonymous user on the fly
-        anonymous_uuid = Ecto.UUID.generate()
-
-        {:ok, anonymous_user} =
-          FoodTracker.Accounts.create_anonymous_user(%{
-            anonymous_uuid: anonymous_uuid,
-            is_anonymous: true,
-            last_active_at: DateTime.utc_now() |> DateTime.truncate(:second)
-          })
-
-        # Send a message to ourselves to set the cookie in the next tick
-        send(
-          self(),
-          {:set_anonymous_cookie,
-           %{
-             "anonymous_uuid" => anonymous_uuid,
-             "set_anonymous_cookie" => true
-           }}
-        )
-
-        # Also assign the user to the socket so we don't hit this again
-        Process.send_after(self(), {:assign_anonymous_user, anonymous_user}, 0)
-
-        anonymous_user.id
+        # We don't create an anonymous user here anymore
+        # Return nil to indicate no user exists yet
+        nil
     end
   end
 

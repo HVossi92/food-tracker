@@ -77,23 +77,22 @@ defmodule FoodTrackerWeb.Food_TrackLive.FormComponent do
   end
 
   defp save_food__track(socket, :new, food__track_params) do
-    # If we don't have a current user or anonymous user yet, create an anonymous user
-    {user_id, socket} = ensure_user_exists(socket)
-
-    # Add the user's ID to the food track params
+    {user_id, updated_socket} = ensure_user_exists(socket)
+    # Add user_id to the food track params
     food__track_params = Map.put(food__track_params, "user_id", user_id)
 
     case Food_Tracking.create_food__track(food__track_params) do
       {:ok, food__track} ->
+        # Notify the parent LiveView about the saved food track
         notify_parent({:saved, food__track})
 
         {:noreply,
-         socket
+         updated_socket
          |> put_flash(:info, "Food track created successfully")
          |> push_patch(to: socket.assigns.patch)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        {:noreply, assign_form(socket, changeset)}
+        {:noreply, assign_form(updated_socket, changeset)}
     end
   end
 
@@ -112,7 +111,7 @@ defmodule FoodTrackerWeb.Food_TrackLive.FormComponent do
         {socket.assigns.anonymous_user.id, socket}
 
       true ->
-        # Create a new anonymous user
+        # This is where a new food track is being created and we need to create an anonymous user
         anonymous_uuid = Ecto.UUID.generate()
 
         {:ok, anonymous_user} =
@@ -122,6 +121,9 @@ defmodule FoodTrackerWeb.Food_TrackLive.FormComponent do
             last_active_at: DateTime.utc_now() |> DateTime.truncate(:second)
           })
 
+        # Store the anonymous user in the process dictionary so the parent can access it
+        Process.put(:new_anonymous_user, anonymous_user)
+
         # Send event to set cookie in client
         token = %{
           "anonymous_uuid" => anonymous_uuid,
@@ -130,6 +132,9 @@ defmodule FoodTrackerWeb.Food_TrackLive.FormComponent do
 
         # Push event to parent LiveView to set the cookie
         send(self(), {:set_anonymous_cookie, token})
+
+        # Also explicitly tell the parent to assign the anonymous user
+        send(self(), {:assign_anonymous_user, anonymous_user})
 
         # Update socket with the new anonymous user
         socket = assign(socket, :anonymous_user, anonymous_user)
