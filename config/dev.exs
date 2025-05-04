@@ -88,3 +88,6 @@ end
 
 # Set env value to :dev for development environment
 config :food_tracker, env: :dev
+
+# Configure Ollama API for development environment
+config :food_tracker, :ollama_api, base_url: "http://localhost:11434/api"
