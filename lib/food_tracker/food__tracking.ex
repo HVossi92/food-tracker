@@ -82,7 +82,26 @@ defmodule FoodTracker.Food_Tracking do
       ** (Ecto.NoResultsError)
 
   """
-  def get_food__track!(id), do: Repo.get!(Food_Track, id)
+
+  # def get_food__track!(id), do: Repo.get!(Food_Track, id)
+
+  @doc """
+  Gets a single food__track owned by the specified user.
+
+  Raises `Ecto.NoResultsError` if the Food track does not exist
+  or does not belong to the specified user.
+
+  ## Examples
+
+      iex> get_food__track!(123, current_user_id)
+      %Food_Track{}
+
+      iex> get_food__track!(456, current_user_id)
+      ** (Ecto.NoResultsError)
+  """
+  def get_food__track!(id, user_id) do
+    Repo.get_by!(Food_Track, id: id, user_id: user_id)
+  end
 
   @doc """
   Creates a food__track.
@@ -157,10 +176,29 @@ defmodule FoodTracker.Food_Tracking do
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_food__track(%Food_Track{} = food__track, attrs) do
+  defp update_food__track(%Food_Track{} = food__track, attrs) do
     food__track
     |> Food_Track.changeset(attrs)
     |> Repo.update()
+  end
+
+  @doc """
+  Updates a food__track after verifying it belongs to the specified user.
+
+  ## Examples
+
+      iex> update_food__track(food_track_id, user_id, %{field: new_value})
+      {:ok, %Food_Track{}}
+
+      iex> update_food__track(food_track_id, user_id, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+      iex> update_food__track(id_belonging_to_other_user, user_id, attrs)
+      ** (Ecto.NoResultsError)
+  """
+  def update_food__track(id, user_id, attrs) do
+    food__track = get_food__track!(id, user_id)
+    update_food__track(food__track, attrs)
   end
 
   @doc """
@@ -175,8 +213,26 @@ defmodule FoodTracker.Food_Tracking do
       {:error, %Ecto.Changeset{}}
 
   """
-  def delete_food__track(%Food_Track{} = food__track) do
-    Repo.delete(food__track)
+
+  # def delete_food__track(%Food_Track{} = food__track) do
+  #   Repo.delete(food__track)
+  # end
+
+  @doc """
+  Deletes a food__track after verifying it belongs to the specified user.
+
+  ## Examples
+
+      iex> delete_food__track(food_track_id, user_id)
+      {:ok, %Food_Track{}}
+
+      iex> delete_food__track(id_belonging_to_other_user, user_id)
+      ** (Ecto.NoResultsError)
+  """
+  def delete_food__track(id, user_id) do
+    id
+    |> get_food__track!(user_id)
+    |> Repo.delete()
   end
 
   @doc """
@@ -188,15 +244,31 @@ defmodule FoodTracker.Food_Tracking do
       %Ecto.Changeset{data: %Food_Track{}}
 
   """
-  def change_food__track(food__track, attrs \\ %{})
+  defp change_food__track(food__track, attrs \\ %{})
 
   # Handle nil case
-  def change_food__track(nil, attrs) do
+  defp change_food__track(nil, attrs) do
     change_food__track(%Food_Track{}, attrs)
   end
 
-  def change_food__track(%Food_Track{} = food__track, attrs) do
+  defp change_food__track(%Food_Track{} = food__track, attrs) do
     Food_Track.changeset(food__track, attrs)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking food__track changes after verifying ownership.
+
+  ## Examples
+
+      iex> change_food__track_with_user(food_track_id, user_id)
+      %Ecto.Changeset{data: %Food_Track{}}
+
+      iex> change_food__track_with_user(id_belonging_to_other_user, user_id)
+      ** (Ecto.NoResultsError)
+  """
+  def change_food__track_with_user(id, user_id, attrs \\ %{}) do
+    food__track = get_food__track!(id, user_id)
+    change_food__track(food__track, attrs)
   end
 
   @doc """

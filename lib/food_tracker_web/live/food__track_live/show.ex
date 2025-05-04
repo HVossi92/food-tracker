@@ -10,12 +10,29 @@ defmodule FoodTrackerWeb.Food_TrackLive.Show do
 
   @impl true
   def handle_params(%{"id" => id}, _, socket) do
+    # Get the user ID from either the current user or anonymous user
+    user_id = get_user_id(socket)
+
     {:noreply,
      socket
      |> assign(:page_title, page_title(socket.assigns.live_action))
-     |> assign(:food__track, Food_Tracking.get_food__track!(id))}
+     |> assign(:food__track, Food_Tracking.get_food__track!(id, user_id))}
   end
 
   defp page_title(:show), do: "Show Food  track"
   defp page_title(:edit), do: "Edit Food  track"
+
+  # Get user ID from either current_user or anonymous_user
+  defp get_user_id(socket) do
+    cond do
+      socket.assigns[:current_user] ->
+        socket.assigns.current_user.id
+
+      socket.assigns[:anonymous_user] ->
+        socket.assigns.anonymous_user.id
+
+      true ->
+        nil
+    end
+  end
 end

@@ -2,6 +2,7 @@ defmodule FoodTrackerWeb.Food_TrackLive.FormComponent do
   use FoodTrackerWeb, :live_component
 
   alias FoodTracker.Food_Tracking
+  alias FoodTracker.Food_Tracking.Food_Track
   alias FoodTracker.Accounts
 
   @impl true
@@ -35,7 +36,19 @@ defmodule FoodTrackerWeb.Food_TrackLive.FormComponent do
 
   @impl true
   def update(%{food__track: food__track} = assigns, socket) do
-    changeset = Food_Tracking.change_food__track(food__track)
+    # Get the user ID for ownership verification
+    user_id = get_user_id(assigns)
+
+    # For new food tracks, use the simple changeset
+    # For existing food tracks, verify ownership using the improved function
+    changeset =
+      if food__track.id do
+        # Get the food track with ownership verification
+        Food_Tracking.change_food__track_with_user(food__track.id, user_id)
+      else
+        # For new food tracks, create a changeset
+        Food_Tracking.Food_Track.changeset(food__track, %{})
+      end
 
     {:ok,
      socket
@@ -47,7 +60,7 @@ defmodule FoodTrackerWeb.Food_TrackLive.FormComponent do
   def handle_event("validate", %{"food__track" => food__track_params}, socket) do
     changeset =
       socket.assigns.food__track
-      |> Food_Tracking.change_food__track(food__track_params)
+      |> Food_Tracking.Food_Track.changeset(food__track_params)
       |> Map.put(:action, :validate)
 
     {:noreply, assign_form(socket, changeset)}
@@ -58,11 +71,12 @@ defmodule FoodTrackerWeb.Food_TrackLive.FormComponent do
   end
 
   defp save_food__track(socket, :edit, food__track_params) do
-    # Ensure user_id can't be changed during edits
-    food__track_params =
-      Map.put(food__track_params, "user_id", socket.assigns.food__track.user_id)
+    # Get the user ID for ownership verification
+    user_id = get_user_id(socket.assigns)
+    food_track_id = socket.assigns.food__track.id
 
-    case Food_Tracking.update_food__track(socket.assigns.food__track, food__track_params) do
+    # Use the user-scoped update function that verifies ownership
+    case Food_Tracking.update_food__track(food_track_id, user_id, food__track_params) do
       {:ok, food__track} ->
         notify_parent({:saved, food__track})
 
@@ -167,4 +181,18 @@ defmodule FoodTrackerWeb.Food_TrackLive.FormComponent do
   end
 
   defp notify_parent(msg), do: send(self(), {__MODULE__, msg})
+
+  # Helper function to get user_id from assigns
+  defp get_user_id(assigns) do
+    cond do
+      assigns[:current_user] ->
+        assigns.current_user.id
+
+      assigns[:anonymous_user] ->
+        assigns.anonymous_user.id
+
+      true ->
+        nil
+    end
+  end
 end

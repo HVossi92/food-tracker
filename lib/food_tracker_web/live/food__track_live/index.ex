@@ -93,9 +93,11 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
+    user_id = get_user_id(socket)
+
     socket
     |> assign(:page_title, "Edit Food  track")
-    |> assign(:food__track, Food_Tracking.get_food__track!(id))
+    |> assign(:food__track, Food_Tracking.get_food__track!(id, user_id))
   end
 
   defp apply_action(socket, :new, _params) do
@@ -184,11 +186,12 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
 
   @impl true
   def handle_event("delete", %{"id" => id}, socket) do
-    food__track = Food_Tracking.get_food__track!(id)
-    {:ok, _} = Food_Tracking.delete_food__track(food__track)
+    user_id = get_user_id(socket)
+
+    # Use the user-scoped delete function
+    {:ok, food__track} = Food_Tracking.delete_food__track(id, user_id)
 
     # After deleting, refresh the daily totals
-    user_id = get_user_id(socket)
     user = socket.assigns[:current_user] || socket.assigns[:anonymous_user]
 
     # Update usage information
