@@ -136,6 +136,67 @@
         </button>
       </div>
     </div>
+    
+<!-- Daily Usage Limit Banner -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 mb-8">
+      <div class="flex flex-col sm:flex-row justify-between items-center">
+        <div class="mb-4 sm:mb-0 text-center sm:text-left">
+          <h3 class="text-lg font-medium text-gray-800 dark:text-white mb-1">
+            Daily Food Entry Limit
+          </h3>
+          <div class="flex items-center justify-center sm:justify-start space-x-2">
+            <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+              <div
+                class="bg-emerald-600 h-2.5 rounded-full"
+                style={"width: #{@todays_usage / @daily_limit * 100}%"}
+              >
+              </div>
+            </div>
+            <span class="text-sm text-gray-600 dark:text-gray-300 font-medium">
+              {@todays_usage}/{@daily_limit}
+            </span>
+          </div>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            You have
+            <span class="font-semibold text-emerald-600 dark:text-emerald-400">
+              {@remaining_entries}
+            </span>
+            entries remaining today
+          </p>
+        </div>
+
+        <div class="text-center sm:text-right">
+          <%= if is_nil(assigns[:current_user]) || (assigns[:current_user] && is_nil(assigns[:current_user].confirmed_at)) do %>
+            <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">
+              <%= if is_nil(assigns[:current_user]) do %>
+                Guest users limited to 4 entries/day to prevent bot usage
+              <% else %>
+                Unconfirmed accounts limited to 4 entries/day
+              <% end %>
+            </p>
+            <%= if is_nil(assigns[:current_user]) do %>
+              <a
+                href={~p"/users/register"}
+                class="inline-block bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded"
+              >
+                Sign up for 16 entries/day
+              </a>
+            <% else %>
+              <a
+                href={~p"/users/confirm"}
+                class="inline-block bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded"
+              >
+                Confirm account for 16 entries/day
+              </a>
+            <% end %>
+          <% else %>
+            <p class="text-sm text-gray-600 dark:text-gray-300">
+              Free tier limited to 16 entries/day to control AI costs
+            </p>
+          <% end %>
+        </div>
+      </div>
+    </div>
 
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8">
       <h2 class="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Add Food Item</h2>

@@ -13,7 +13,17 @@ defmodule FoodTracker.Services.GeminiService do
 
   # Get configuration from application config
   defp gemini_url, do: Application.get_env(:food_tracker, :gemini_api)[:url]
-  defp api_key, do: Application.get_env(:food_tracker, :gemini_api)[:api_key]
+
+  defp api_key do
+    key = Application.get_env(:food_tracker, :gemini_api)[:api_key]
+
+    if is_nil(key) || key == "" do
+      Logger.error("Gemini API key is not set or empty. Check your configuration.")
+      nil
+    else
+      key
+    end
+  end
 
   @impl true
   def get_nutrition_info(food_item) do
@@ -66,46 +76,56 @@ defmodule FoodTracker.Services.GeminiService do
   end
 
   defp gemini_request(system_prompt, prompt, unit, _question) do
-    url = "#{gemini_url()}?key=#{api_key()}"
+    api_key = api_key()
 
-    # Build the request payload
-    payload = %{
-      contents: [
-        %{
-          parts: [
-            %{
-              text: system_prompt <> "\n\n" <> prompt
-            }
-          ]
+    if is_nil(api_key) do
+      {:error, "Gemini API key is not configured"}
+    else
+      url = "#{gemini_url()}?key=#{api_key}"
+
+      Logger.debug(
+        "Making Gemini API request to: #{gemini_url()} with API key: #{String.slice(api_key, 0, 5)}..."
+      )
+
+      # Build the request payload
+      payload = %{
+        contents: [
+          %{
+            parts: [
+              %{
+                text: system_prompt <> "\n\n" <> prompt
+              }
+            ]
+          }
+        ],
+        generation_config: %{
+          temperature: 0.2
         }
-      ],
-      generation_config: %{
-        temperature: 0.2
       }
-    }
 
-    # Convert the payload to JSON
-    {:ok, json_payload} = Jason.encode(payload)
+      # Convert the payload to JSON
+      {:ok, json_payload} = Jason.encode(payload)
 
-    # Make the HTTP request
-    case :post
-         |> Finch.build(
-           url,
-           [{"Content-Type", "application/json"}],
-           json_payload
-         )
-         |> Finch.request(FoodTracker.Finch) do
-      {:ok, %Finch.Response{status: 200, body: body}} ->
-        process_response(body, unit)
+      # Make the HTTP request
+      case :post
+           |> Finch.build(
+             url,
+             [{"Content-Type", "application/json"}],
+             json_payload
+           )
+           |> Finch.request(FoodTracker.Finch) do
+        {:ok, %Finch.Response{status: 200, body: body}} ->
+          process_response(body, unit)
 
-      {:ok, %Finch.Response{status: status, body: body}} ->
-        error_message = "HTTP error: #{status}, #{body}"
-        Logger.error(error_message)
-        {:error, error_message}
+        {:ok, %Finch.Response{status: status, body: body}} ->
+          error_message = "HTTP error: #{status}, #{body}"
+          Logger.error(error_message)
+          {:error, error_message}
 
-      {:error, reason} ->
-        Logger.error("Request error: #{inspect(reason)}")
-        {:error, inspect(reason)}
+        {:error, reason} ->
+          Logger.error("Request error: #{inspect(reason)}")
+          {:error, inspect(reason)}
+      end
     end
   end
 

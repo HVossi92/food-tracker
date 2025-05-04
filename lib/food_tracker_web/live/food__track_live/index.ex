@@ -12,12 +12,21 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
 
     # Get the user ID from either the current user or anonymous user
     user_id = get_user_id(socket)
+    user = socket.assigns[:current_user] || socket.assigns[:anonymous_user]
+
+    # Get today's usage and limit information
+    todays_usage = Food_Tracking.count_todays_food_tracks(user_id)
+    daily_limit = Food_Tracking.get_daily_food_track_limit(user)
+    remaining_entries = max(0, daily_limit - todays_usage)
 
     socket =
       socket
       |> assign(:food__track, %FoodTracker.Food_Tracking.Food_Track{})
       |> assign(:date, today)
       |> assign(:today, today)
+      |> assign(:todays_usage, todays_usage)
+      |> assign(:daily_limit, daily_limit)
+      |> assign(:remaining_entries, remaining_entries)
 
     # Pattern match the return value to get food_tracks, calories, and protein
     %{food_tracks: food_tracks, calories: total_calories, protein: total_protein} =
@@ -35,6 +44,18 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
   @impl true
   def handle_params(params, _url, socket) do
     user_id = get_user_id(socket)
+    user = socket.assigns[:current_user] || socket.assigns[:anonymous_user]
+
+    # Get today's usage and limit information
+    todays_usage = Food_Tracking.count_todays_food_tracks(user_id)
+    daily_limit = Food_Tracking.get_daily_food_track_limit(user)
+    remaining_entries = max(0, daily_limit - todays_usage)
+
+    socket =
+      socket
+      |> assign(:todays_usage, todays_usage)
+      |> assign(:daily_limit, daily_limit)
+      |> assign(:remaining_entries, remaining_entries)
 
     socket =
       case params do
@@ -121,12 +142,21 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
 
     # Now get the user ID (which will use the newly assigned anonymous user if one was created)
     user_id = get_user_id(socket)
+    user = socket.assigns[:current_user] || socket.assigns[:anonymous_user]
+
+    # Update usage information
+    todays_usage = Food_Tracking.count_todays_food_tracks(user_id)
+    daily_limit = Food_Tracking.get_daily_food_track_limit(user)
+    remaining_entries = max(0, daily_limit - todays_usage)
 
     %{food_tracks: food_tracks, calories: total_calories, protein: total_protein} =
       Food_Tracking.list_food_tracks_on(food__track.date, user_id)
 
     socket =
       socket
+      |> assign(:todays_usage, todays_usage)
+      |> assign(:daily_limit, daily_limit)
+      |> assign(:remaining_entries, remaining_entries)
       |> assign(:total_calories, total_calories)
       |> assign(:total_protein, total_protein)
       |> stream(:food_tracks, [], reset: true)
@@ -159,6 +189,13 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
 
     # After deleting, refresh the daily totals
     user_id = get_user_id(socket)
+    user = socket.assigns[:current_user] || socket.assigns[:anonymous_user]
+
+    # Update usage information
+    todays_usage = Food_Tracking.count_todays_food_tracks(user_id)
+    daily_limit = Food_Tracking.get_daily_food_track_limit(user)
+    remaining_entries = max(0, daily_limit - todays_usage)
+
     current_date = socket.assigns.date
     date_ymd = FoodTracker.Utils.string_to_date(current_date) |> Utils.date_to_ymd_string()
 
@@ -168,6 +205,9 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
 
     socket =
       socket
+      |> assign(:todays_usage, todays_usage)
+      |> assign(:daily_limit, daily_limit)
+      |> assign(:remaining_entries, remaining_entries)
       |> assign(:total_calories, total_calories)
       |> assign(:total_protein, total_protein)
       |> stream_delete(:food_tracks, food__track)

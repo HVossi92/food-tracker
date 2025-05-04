@@ -198,4 +198,73 @@ defmodule FoodTracker.Food_Tracking do
   def change_food__track(%Food_Track{} = food__track, attrs) do
     Food_Track.changeset(food__track, attrs)
   end
+
+  @doc """
+  Counts the number of food tracks created/updated by a user today.
+
+  ## Examples
+
+      iex> count_todays_food_tracks(user_id)
+      5
+
+  """
+  def count_todays_food_tracks(user_id) do
+    # Return 0 if user_id is nil
+    if is_nil(user_id) do
+      0
+    else
+      today_start = Date.utc_today() |> DateTime.new!(~T[00:00:00], "Etc/UTC")
+      today_end = Date.utc_today() |> DateTime.new!(~T[23:59:59.999999], "Etc/UTC")
+
+      query =
+        from(
+          track in Food_Track,
+          where:
+            track.user_id == ^user_id and
+              track.inserted_at >= ^today_start and
+              track.inserted_at <= ^today_end
+        )
+
+      Repo.aggregate(query, :count, :id)
+    end
+  end
+
+  @doc """
+  Determines the user's daily food tracking limit based on their account status.
+  Guest users (unconfirmed) can add 4 items per day.
+  Confirmed users can add 16 items per day.
+
+  ## Examples
+
+      iex> get_daily_food_track_limit(user)
+      16
+
+  """
+  def get_daily_food_track_limit(user) do
+    cond do
+      # Default guest limit
+      is_nil(user) -> 4
+      # Unconfirmed user limit
+      is_nil(user.confirmed_at) -> 4
+      # Confirmed user limit
+      true -> 16
+    end
+  end
+
+  @doc """
+  Checks if a user has reached their daily limit for adding food tracks.
+
+  ## Examples
+
+      iex> can_add_food_track?(user)
+      true
+
+  """
+  def can_add_food_track?(user) do
+    user_id = if user, do: user.id, else: nil
+    count = count_todays_food_tracks(user_id)
+    limit = get_daily_food_track_limit(user)
+
+    count < limit
+  end
 end

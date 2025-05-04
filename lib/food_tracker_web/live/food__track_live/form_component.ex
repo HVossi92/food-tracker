@@ -78,21 +78,44 @@ defmodule FoodTrackerWeb.Food_TrackLive.FormComponent do
 
   defp save_food__track(socket, :new, food__track_params) do
     {user_id, updated_socket} = ensure_user_exists(socket)
-    # Add user_id to the food track params
-    food__track_params = Map.put(food__track_params, "user_id", user_id)
 
-    case Food_Tracking.create_food__track(food__track_params) do
-      {:ok, food__track} ->
-        # Notify the parent LiveView about the saved food track
-        notify_parent({:saved, food__track})
+    # Get the user for limit checking
+    user = socket.assigns[:current_user] || socket.assigns[:anonymous_user]
 
-        {:noreply,
-         updated_socket
-         |> put_flash(:info, "Food track created successfully")
-         |> push_patch(to: socket.assigns.patch)}
+    # Check if user can add more food tracks today
+    if FoodTracker.Food_Tracking.can_add_food_track?(user) do
+      # Add user_id to the food track params
+      food__track_params = Map.put(food__track_params, "user_id", user_id)
 
-      {:error, %Ecto.Changeset{} = changeset} ->
-        {:noreply, assign_form(updated_socket, changeset)}
+      case Food_Tracking.create_food__track(food__track_params) do
+        {:ok, food__track} ->
+          # Notify the parent LiveView about the saved food track
+          notify_parent({:saved, food__track})
+
+          {:noreply,
+           updated_socket
+           |> put_flash(:info, "Food track created successfully")
+           |> push_patch(to: socket.assigns.patch)}
+
+        {:error, %Ecto.Changeset{} = changeset} ->
+          {:noreply, assign_form(updated_socket, changeset)}
+      end
+    else
+      # User has reached daily limit
+      limit = FoodTracker.Food_Tracking.get_daily_food_track_limit(user)
+
+      # Get the appropriate message based on account status
+      message =
+        if user && user.confirmed_at do
+          "You've reached your daily limit of #{limit} food entries. This limit helps us control AI costs."
+        else
+          "You've reached your daily limit of #{limit} food entries. Create and confirm an account for higher limits."
+        end
+
+      {:noreply,
+       updated_socket
+       |> put_flash(:error, message)
+       |> push_patch(to: socket.assigns.patch)}
     end
   end
 

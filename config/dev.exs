@@ -104,3 +104,11 @@ config :food_tracker, FoodTracker.Mailer,
     depth: 99,
     server_name_indication: ~c"smtp.gmail.com"
   ]
+
+# Configure Gemini API for development
+config :food_tracker, :gemini_api,
+  url: "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
+
+# Import environment-specific secret configuration file
+# Contains sensitive data like API keys
+import_config "dev.secret.exs"
