@@ -507,6 +507,8 @@ defmodule FoodTracker.AccountsTest do
   end
 
   describe "anonymous users" do
+    import FoodTracker.Food_TrackingFixtures
+
     test "create_anonymous_user/1 creates an anonymous user" do
       uuid = Ecto.UUID.generate()
 
@@ -632,6 +634,45 @@ defmodule FoodTracker.AccountsTest do
                email: ["must have the @ sign and no spaces"],
                password: ["should be at least 6 character(s)"]
              } = errors_on(changeset)
+    end
+
+    test "data persists through anonymous user conversion" do
+      # Create an anonymous user
+      anonymous_user = anonymous_user_fixture()
+
+      # Create food tracking data for this anonymous user
+      food_track1 = food__track_fixture(user_id: anonymous_user.id, name: "Breakfast")
+      food_track2 = food__track_fixture(user_id: anonymous_user.id, name: "Lunch")
+
+      # Verify food tracks are accessible to the anonymous user
+      food_tracks_before = FoodTracker.Food_Tracking.list_food_tracks(anonymous_user.id)
+      assert length(food_tracks_before) == 2
+      assert Enum.any?(food_tracks_before, fn track -> track.id == food_track1.id end)
+      assert Enum.any?(food_tracks_before, fn track -> track.id == food_track2.id end)
+
+      # Convert anonymous user to registered user
+      registration_attrs = %{
+        email: unique_user_email(),
+        password: valid_user_password()
+      }
+
+      assert {:ok, registered_user} =
+               Accounts.convert_anonymous_to_registered(anonymous_user, registration_attrs)
+
+      # Verify user ID remains the same
+      assert registered_user.id == anonymous_user.id
+      assert registered_user.is_anonymous == false
+
+      # Verify food tracks are still accessible to the converted user
+      food_tracks_after = FoodTracker.Food_Tracking.list_food_tracks(registered_user.id)
+      assert length(food_tracks_after) == 2
+      assert Enum.any?(food_tracks_after, fn track -> track.id == food_track1.id end)
+      assert Enum.any?(food_tracks_after, fn track -> track.id == food_track2.id end)
+
+      # Verify we can still access specific food tracks
+      retrieved_track1 = FoodTracker.Food_Tracking.get_food__track!(food_track1.id)
+      assert retrieved_track1.name == "Breakfast"
+      assert retrieved_track1.user_id == registered_user.id
     end
   end
 end

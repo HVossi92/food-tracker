@@ -85,9 +85,9 @@ The goal is to allow users to try out the app without registration, only prompti
 
 10. **Final Testing**
 
-    - [ ] Verify all user flows (anonymous → registered)
-    - [ ] Test edge cases for authentication
-    - [ ] Test data persistence through conversion
+    - [x] Verify all user flows (anonymous → registered)
+    - [x] Test edge cases for authentication
+    - [x] Test data persistence through conversion
 
 ## For Users
 

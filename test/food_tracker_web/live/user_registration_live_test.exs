@@ -3,6 +3,7 @@ defmodule FoodTrackerWeb.UserRegistrationLiveTest do
 
   import Phoenix.LiveViewTest
   import FoodTracker.AccountsFixtures
+  alias Phoenix.LiveView.Socket
 
   describe "Registration page" do
     test "renders registration page", %{conn: conn} do
@@ -70,6 +71,47 @@ defmodule FoodTrackerWeb.UserRegistrationLiveTest do
         |> render_submit()
 
       assert result =~ "has already been taken"
+    end
+
+    test "verifies data persistence in anonymous to registered conversion" do
+      # Create an anonymous user
+      anonymous_uuid = Ecto.UUID.generate()
+
+      {:ok, anonymous_user} =
+        FoodTracker.Accounts.create_anonymous_user(%{
+          anonymous_uuid: anonymous_uuid,
+          is_anonymous: true,
+          last_active_at: DateTime.utc_now() |> DateTime.truncate(:second)
+        })
+
+      # Add some food tracks for this anonymous user
+      {:ok, food_track} =
+        FoodTracker.Food_Tracking.create_food__track(%{
+          "name" => "Anonymous Breakfast",
+          "date" => "2025-01-01",
+          "time" => "08:30",
+          "user_id" => anonymous_user.id
+        })
+
+      # Convert the anonymous user to a registered user
+      email = unique_user_email()
+      password = valid_user_password()
+
+      {:ok, registered_user} =
+        FoodTracker.Accounts.convert_anonymous_to_registered(
+          anonymous_user,
+          %{email: email, password: password}
+        )
+
+      # Verify the user is now registered with the same ID
+      assert registered_user.id == anonymous_user.id
+      assert registered_user.is_anonymous == false
+      assert registered_user.email == email
+
+      # Verify the food track is still accessible and linked to the same user
+      retrieved_track = FoodTracker.Food_Tracking.get_food__track!(food_track.id)
+      assert retrieved_track.name == "Anonymous Breakfast"
+      assert retrieved_track.user_id == registered_user.id
     end
   end
 
