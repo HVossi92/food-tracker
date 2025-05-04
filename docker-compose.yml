@@ -5,11 +5,11 @@ services:
     image: your_dockerhub_username/food_tracker:latest
     environment:
       - DATABASE_PATH=/app/food_tracker.db
-      - SECRET_KEY_BASE=fMVThkvZcbnWrvr6jinIm++oJukGiF3ML1/5OI7dUp4WMBR1cKlwKn99BYS661zX
+      - SECRET_KEY_BASE=generated_by_mix_phx.gen.secret
       - PHX_HOST=munchmetrics.duckdns.org
       - PORT=4000
       - PHX_SERVER=true
-      - GEMINI_API_KEY=AIzaSyBlEPgZa_oTqgSUa3c_OBmDezpG35go_C0
+      - GEMINI_API_KEY=from_aistudio
     ports:
       - '4000:4000'
     volumes:

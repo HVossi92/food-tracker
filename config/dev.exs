@@ -81,13 +81,26 @@ config :phoenix_live_view,
 # Disable swoosh api client as it is only required for production adapters.
 config :swoosh, :api_client, false
 
-# Import development secrets if the file exists
-if File.exists?(Path.join([__DIR__, "dev.secret.exs"])) do
-  import_config "dev.secret.exs"
-end
-
 # Set env value to :dev for development environment
 config :food_tracker, env: :dev
 
 # Configure Ollama API for development environment
 config :food_tracker, :ollama_api, base_url: "http://localhost:11434/api"
+
+config :food_tracker, FoodTracker.Mailer,
+  adapter: Swoosh.Adapters.SMTP,
+  relay: "smtp.gmail.com",
+  port: 465,
+  username: System.get_env("GMAIL_USERNAME"),
+  password: System.get_env("GMAIL_PASSWORD"),
+  ssl: true,
+  tls: :never,
+  auth: :always,
+  no_mx_lookups: true,
+  retries: 2,
+  sockopts: [
+    verify: :verify_peer,
+    cacerts: :public_key.cacerts_get(),
+    depth: 99,
+    server_name_indication: ~c"smtp.gmail.com"
+  ]
