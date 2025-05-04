@@ -472,6 +472,13 @@ defmodule FoodTrackerWeb.CoreComponents do
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8 overflow-x-auto">
       <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-semibold text-gray-800 dark:text-white">Today's Food Log</h2>
+        <!-- AI Disclaimer -->
+        <div class="md:col-span-12 mt-2">
+          <p class="text-xs text-gray-500 dark:text-gray-400 italic text-center">
+            <.icon name="hero-information-circle" class="inline-block h-3 w-3 mr-1" />
+            Nutritional values are AI-generated and may not be accurate.
+          </p>
+        </div>
       </div>
       <div class="overflow-x-auto overflow-y-hidden">
         <table class="w-full divide-y divide-gray-200 dark:divide-gray-700">

@@ -210,7 +210,7 @@
         </div>
         
 <!-- Nutrition Summary -->
-        <div class="md:col-span-6 flex space-x-2">
+        <div class="md:col-span-6 flex space-x-2" title="AI-generated values may not be accurate">
           <div class="w-1/2 p-2 bg-emerald-50 dark:bg-emerald-900 rounded-lg text-center">
             <h3 class="text-xs font-medium text-gray-500 dark:text-gray-400 -mb-0.5">Calories</h3>
             <p class="text-base font-bold text-emerald-600 dark:text-emerald-400">
@@ -250,7 +250,11 @@
       </:col>
       <:action :let={{id, food__track}}>
         <div class="flex space-x-3">
-          <.link patch={~p"/food_tracks/#{food__track}/show/edit"} phx-click={JS.push_focus()}>
+          <.link
+            :if={not is_nil(@current_user)}
+            patch={~p"/food_tracks/#{food__track}/show/edit"}
+            phx-click={JS.push_focus()}
+          >
             <.icon name="hero-pencil-square" class="w-5 h-5 text-blue-600 hover:text-blue-800" />
           </.link>
           <.link
