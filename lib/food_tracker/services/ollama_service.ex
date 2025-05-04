@@ -78,7 +78,9 @@ defmodule FoodTracker.Services.OllamaService do
   end
 
   defp ollama_request(system_prompt, prompt, unit, question) do
-    client = Ollama.init()
+    # Get the configured base_url from application config
+    base_url = Application.get_env(:food_tracker, :ollama_api)[:base_url]
+    client = Ollama.init(base_url)
 
     Ollama.completion(client,
       model: "gemma3:1b",

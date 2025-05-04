@@ -9,6 +9,7 @@ services:
       - PHX_HOST=munchmetrics.duckdns.org
       - PORT=4000
       - PHX_SERVER=true
+      - GEMINI_API_KEY=AIzaSyBlEPgZa_oTqgSUa3c_OBmDezpG35go_C0
     ports:
       - '4000:4000'
     volumes:

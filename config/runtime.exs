@@ -32,6 +32,18 @@ if config_env() == :prod do
     database: database_path,
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "5")
 
+  # Configure Gemini API for production
+  gemini_api_key =
+    System.get_env("GEMINI_API_KEY") ||
+      raise """
+      environment variable GEMINI_API_KEY is missing.
+      """
+
+  config :food_tracker, :gemini_api,
+    url:
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent",
+    api_key: gemini_api_key
+
   # The secret key base is used to sign/encrypt cookies and other secrets.
   # A default value is used in config/dev.exs and config/test.exs but you
   # want to use a different value for prod and you most likely don't want

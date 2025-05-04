@@ -20,5 +20,8 @@ config :logger, level: :info
 # Set env value to :prod for production environment
 config :food_tracker, env: :prod
 
+# Configure Ollama API for production (Docker container name)
+config :food_tracker, :ollama_api, base_url: "http://ollama:11434/api"
+
 # Runtime production configuration, including reading
 # of environment variables, is done on config/runtime.exs.
