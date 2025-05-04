@@ -60,14 +60,14 @@ defmodule FoodTrackerWeb.UserRegistrationLive do
     changeset = Accounts.change_user_registration(%User{})
 
     # Check if we have an anonymous user to convert
-    has_anonymous_user =
-      Map.has_key?(socket.assigns, :anonymous_user) && socket.assigns.anonymous_user
-
     socket =
       socket
       |> assign(trigger_submit: false, check_errors: false)
-      |> assign(anonymous_user: has_anonymous_user)
       |> assign_form(changeset)
+
+    # Get anonymous user from socket assigns if it exists
+    has_anonymous_user = Map.get(socket.assigns, :anonymous_user)
+    socket = assign(socket, anonymous_user: has_anonymous_user)
 
     {:ok, socket, temporary_assigns: [form: nil]}
   end
@@ -88,8 +88,12 @@ defmodule FoodTrackerWeb.UserRegistrationLive do
   end
 
   defp handle_anonymous_conversion(socket, user_params) do
-    case convert_anonymous_to_registered(socket.conn, user_params) do
-      {:ok, conn, user} ->
+    # Need to make sure we're properly accessing the anonymous user from the socket
+    anonymous_user = socket.assigns.anonymous_user
+
+    # Call the accounts context function directly since we have the anonymous user
+    case Accounts.convert_anonymous_to_registered(anonymous_user, user_params) do
+      {:ok, user} ->
         # Send confirmation instructions
         {:ok, _} =
           Accounts.deliver_user_confirmation_instructions(

@@ -78,9 +78,16 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
   end
 
   defp apply_action(socket, :new, _params) do
+    # Get the current date from the UI and convert to YYYY-MM-DD format for the database
+    current_date_dmy = socket.assigns.date
+
+    current_date_ymd =
+      FoodTracker.Utils.string_to_date(current_date_dmy)
+      |> FoodTracker.Utils.date_to_ymd_string()
+
     socket
-    |> assign(:page_title, "New Food  track")
-    |> assign(:food__track, %Food_Track{})
+    |> assign(:page_title, "New Food track")
+    |> assign(:food__track, %Food_Track{date: current_date_ymd})
   end
 
   defp apply_action(socket, :index, _params) do

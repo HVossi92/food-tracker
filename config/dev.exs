@@ -85,3 +85,6 @@ config :swoosh, :api_client, false
 if File.exists?(Path.join([__DIR__, "dev.secret.exs"])) do
   import_config "dev.secret.exs"
 end
+
+# Set env value to :dev for development environment
+config :food_tracker, env: :dev

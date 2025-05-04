@@ -9,6 +9,9 @@ defmodule FoodTracker.Food_Tracking do
   alias FoodTracker.Services.OllamaService
   alias FoodTracker.Services.GeminiService
 
+  # Define a module attribute that can be set at compile time but used at runtime
+  @env Application.compile_env(:food_tracker, :env, :prod)
+
   @doc """
   Returns the list of food_tracks.
 
@@ -96,7 +99,7 @@ defmodule FoodTracker.Food_Tracking do
   def create_food__track(attrs \\ %{}) do
     # Skip nutrition API calls in test environment
     attrs =
-      if Mix.env() == :test do
+      if @env == :test do
         attrs
         |> Map.put("calories", -1.0)
         |> Map.put("protein", -1.0)

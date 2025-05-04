@@ -48,6 +48,38 @@ defmodule FoodTrackerWeb.Food_TrackLiveTest do
       assert render(index_live) =~ "some name"
     end
 
+    test "uses selected date when creating a food track", %{conn: conn, user: user} do
+      {:ok, index_live, _html} = live(conn, ~p"/food_tracks")
+
+      # First navigate to a different date (tomorrow)
+      index_live |> element("button[phx-click='next_day']") |> render_click()
+
+      # Get tomorrow's date in expected format
+      tomorrow = Date.utc_today() |> Date.add(1)
+      tomorrow_ymd = FoodTracker.Utils.date_to_ymd_string(tomorrow)
+
+      # Create a food track (only name is needed, date should come from UI)
+      attrs = %{name: "Tomorrow's food"}
+
+      # Submit the form
+      index_live
+      |> form("#food__track-form", food__track: attrs)
+      |> render_submit()
+
+      # Check for successful save message
+      assert render(index_live) =~ "Food track created successfully"
+
+      # Verify the food track was created with tomorrow's date
+      food_tracks = FoodTracker.Food_Tracking.list_food_tracks_on(tomorrow_ymd, user.id)
+
+      assert length(food_tracks.food_tracks) > 0
+
+      assert Enum.any?(food_tracks.food_tracks, fn track ->
+               track.name == "Tomorrow's food" &&
+                 FoodTracker.Utils.string_to_date(track.date) == tomorrow
+             end)
+    end
+
     @tag :skip
     test "updates food__track in listing", %{conn: conn, food__track: food__track} do
       {:ok, index_live, _html} = live(conn, ~p"/food_tracks")
