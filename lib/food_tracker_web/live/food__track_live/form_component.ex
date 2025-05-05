@@ -15,6 +15,8 @@ defmodule FoodTrackerWeb.Food_TrackLive.FormComponent do
         <:subtitle :if={@subtitle}>{@subtitle}</:subtitle>
       </.header>
 
+      <%!-- Display date value properly: --%>
+
       <.simple_form
         for={@form}
         id="food__track-form"
@@ -25,6 +27,13 @@ defmodule FoodTrackerWeb.Food_TrackLive.FormComponent do
         <.input field={@form[:name]} type="text" label="Name" />
         <.input field={@form[:date]} type="date" label="Date" />
         <.input field={@form[:time]} type="time" label="Time" />
+        <.input
+          phx-hook="LocalTime"
+          id="form-time-input"
+          field={@form[:time]}
+          type="time"
+          label="Time"
+        />
         <:actions>
           <.button phx-disable-with="Saving...">Save Food Log</.button>
         </:actions>

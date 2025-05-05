@@ -42,6 +42,21 @@ Hooks.AnonymousCookie = {
   }
 }
 
+Hooks.LocalTime = {
+  mounted() {
+    this.updated()
+  },
+  updated() {
+    const dateString = this.el.textContent.trim();
+    console.log("🚀 ~ updated ~ dateString:", dateString)
+    const date = new Date(dateString);
+    this.el.textContent =
+      date.toLocaleString() +
+      " " +
+      Intl.DateTimeFormat().resolvedOptions().timeZone;
+  }
+}
+
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 let liveSocket = new LiveSocket("/live", Socket, {
   hooks: Hooks,

@@ -139,6 +139,9 @@
 
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8">
       <h2 class="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Add Food Item</h2>
+      <time phx-hook="LocalTime" id="time-input">
+        {@current_datetime}
+      </time>
       <.live_component
         module={FoodTrackerWeb.Food_TrackLive.FormComponent}
         id={:new}
