@@ -512,7 +512,7 @@ defmodule FoodTrackerWeb.CoreComponents do
                   @row_click && "hover:cursor-pointer"
                 ]}
               >
-                <div class="block py-2 sm:py-4 pr-2 sm:pr-6">
+                <div class="block py-2 sm:py-4 pr-2">
                   <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-zinc-50 dark:group-hover:bg-gray-700 sm:rounded-l-xl" />
                   <span
                     class={["relative", i == 0 && "font-semibold "]}
