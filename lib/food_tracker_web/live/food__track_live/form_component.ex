@@ -2,7 +2,6 @@ defmodule FoodTrackerWeb.Food_TrackLive.FormComponent do
   use FoodTrackerWeb, :live_component
 
   alias FoodTracker.Food_Tracking
-  alias FoodTracker.Food_Tracking.Food_Track
   alias FoodTracker.Accounts
 
   @impl true

@@ -9,6 +9,7 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
   def mount(_params, _session, socket) do
     today = Date.utc_today() |> Utils.date_to_dmy_string()
     today_ymd = Date.utc_today() |> Utils.date_to_ymd_string()
+    current_time = DateTime.utc_now() |> DateTime.to_string() |> String.slice(11, 5)
 
     # Get the user ID from either the current user or anonymous user
     user_id = get_user_id(socket)
@@ -21,7 +22,10 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
 
     socket =
       socket
-      |> assign(:food__track, %FoodTracker.Food_Tracking.Food_Track{})
+      |> assign(:food__track, %FoodTracker.Food_Tracking.Food_Track{
+        date: today_ymd,
+        time: current_time
+      })
       |> assign(:date, today)
       |> assign(:today, today)
       |> assign(:todays_usage, todays_usage)
