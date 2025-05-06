@@ -106,7 +106,10 @@ defmodule FoodTracker.Services.GeminiService do
       case :post
            |> Finch.build(
              url,
-             [{"Content-Type", "application/json"}],
+             [
+               {"Content-Type", "application/json"},
+               {"X-Goog-User-Location", "european_union"}
+             ],
              json_payload
            )
            |> Finch.request(FoodTracker.Finch) do
