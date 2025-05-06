@@ -10,13 +10,15 @@ defmodule FoodTrackerWeb.UserSettingsLive do
       <:subtitle>Manage your account email address and password settings</:subtitle>
     </.header>
 
-    <div class="space-y-12 divide-y">
-      <div>
+    <div class="max-w-2xl mx-auto mt-8 space-y-8 divide-y divide-gray-200 dark:divide-gray-700">
+      <div class="pt-6 pb-8">
+        <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Email Settings</h3>
         <.simple_form
           for={@email_form}
           id="email_form"
           phx-submit="update_email"
           phx-change="validate_email"
+          class="space-y-4"
         >
           <.input field={@email_form[:email]} type="email" label="Email" required />
           <.input
@@ -29,11 +31,13 @@ defmodule FoodTrackerWeb.UserSettingsLive do
             required
           />
           <:actions>
-            <.button phx-disable-with="Changing...">Change Email</.button>
+            <.button phx-disable-with="Changing..." class="mt-4">Change Email</.button>
           </:actions>
         </.simple_form>
       </div>
-      <div>
+
+      <div class="pt-6 pb-8">
+        <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Password Settings</h3>
         <.simple_form
           for={@password_form}
           id="password_form"
@@ -42,6 +46,7 @@ defmodule FoodTrackerWeb.UserSettingsLive do
           phx-change="validate_password"
           phx-submit="update_password"
           phx-trigger-action={@trigger_submit}
+          class="space-y-4"
         >
           <input
             name={@password_form[:email].name}
@@ -65,30 +70,35 @@ defmodule FoodTrackerWeb.UserSettingsLive do
             required
           />
           <:actions>
-            <.button phx-disable-with="Changing...">Change Password</.button>
+            <.button phx-disable-with="Changing..." class="mt-4">Change Password</.button>
           </:actions>
         </.simple_form>
       </div>
-      <div>
-        <.simple_form for={@email_form} id="delete_account_form" phx-submit="delete_account">
-          <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Delete Account</h3>
+
+      <div class="pt-6 pb-8">
+        <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Danger Zone</h3>
+        <.simple_form
+          for={@email_form}
+          id="delete_account_form"
+          phx-submit="delete_account"
+          class="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg border border-gray-200 dark:border-gray-700"
+        >
           <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">
             This action cannot be undone. All your data will be permanently deleted.
           </p>
           <:actions>
-            <button
+            <.button
               type="submit"
-              class="w-full py-2 px-4 rounded-md transition duration-200 text-white bg-red-600 hover:bg-red-700"
+              class="mt-4 bg-red-600 hover:bg-red-700"
               data-confirm="Are you sure you want to delete your account? This action cannot be undone."
               phx-disable-with="Deleting..."
             >
               Delete account
-            </button>
+            </.button>
           </:actions>
         </.simple_form>
       </div>
     </div>
-    <br />
     """
   end
 

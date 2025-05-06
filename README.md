@@ -15,10 +15,10 @@ Demo: https://munchmetrics.vossihub.org/
 [x] On refresh/load jump to today in the form date input
 [x] On refresh/load jump to current time in the form date input
 [x] Improve table layout (date, time)
+[x] Edit calories & protein
+[x] Fix settings layout
+[x] Do not redirect for edit
 [ ] Display time in the user's timezone
-[ ] Edit calories & protein
-[ ] Fix settings layout
-[ ] Do not redirect for edit
 [ ] Improve ai generated nutritional values
 
 ## For Users
