@@ -250,11 +250,7 @@
       </:col>
       <:action :let={{id, food__track}}>
         <div class="flex space-x-3">
-          <.link
-            :if={not is_nil(@current_user)}
-            patch={~p"/food_tracks/#{food__track}/show/edit"}
-            phx-click={JS.push_focus()}
-          >
+          <.link patch={~p"/food_tracks/#{food__track}/edit"} phx-click={JS.push_focus()}>
             <.icon name="hero-pencil-square" class="w-5 h-5 text-blue-600 hover:text-blue-800" />
           </.link>
           <.link
@@ -269,3 +265,20 @@
   </div>
 </div>
 <!-- Footer -->
+
+<.modal
+  :if={@live_action == :edit}
+  id="food__track-modal"
+  show
+  on_cancel={JS.patch(~p"/food_tracks")}
+>
+  <.live_component
+    module={FoodTrackerWeb.Food_TrackLive.FormComponent_Extended}
+    id={@food__track.id}
+    title={@page_title}
+    action={@live_action}
+    food__track={@food__track}
+    current_user={@current_user || @anonymous_user}
+    patch={~p"/food_tracks"}
+  />
+</.modal>

@@ -23,7 +23,7 @@
   on_cancel={JS.patch(~p"/food_tracks/#{@food__track}")}
 >
   <.live_component
-    module={FoodTrackerWeb.Food_TrackLive.FormComponent}
+    module={FoodTrackerWeb.Food_TrackLive.FormComponent_Extended}
     id={@food__track.id}
     title={@page_title}
     action={@live_action}

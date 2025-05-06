@@ -1,4 +1,4 @@
-defmodule FoodTrackerWeb.Food_TrackLive.FormComponent do
+defmodule FoodTrackerWeb.Food_TrackLive.FormComponent_Extended do
   use FoodTrackerWeb, :live_component
 
   alias FoodTracker.Food_Tracking
@@ -27,6 +27,8 @@ defmodule FoodTrackerWeb.Food_TrackLive.FormComponent do
         <.input field={@form[:name]} type="text" label="Name" />
         <.input field={@form[:date]} type="date" label="Date" />
         <.input field={@form[:time]} type="time" label="Time" />
+        <.input field={@form[:calories]} type="number" label="Calories" />
+        <.input field={@form[:protein]} type="number" label="Protein" />
         <:actions>
           <.button phx-disable-with="Saving...">Save Food Log</.button>
         </:actions>

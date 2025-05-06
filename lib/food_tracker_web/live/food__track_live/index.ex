@@ -102,7 +102,7 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
     user_id = get_user_id(socket)
 
     socket
-    |> assign(:page_title, "Edit Food  track")
+    |> assign(:page_title, "Edit Food track")
     |> assign(:food__track, Food_Tracking.get_food__track!(id, user_id))
   end
 
@@ -171,6 +171,15 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
       |> stream(:food_tracks, food_tracks)
 
     {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info(
+        {FoodTrackerWeb.Food_TrackLive.FormComponent_Extended, {:saved, food__track}},
+        socket
+      ) do
+    # Reuse the same implementation as for the FormComponent
+    handle_info({FoodTrackerWeb.Food_TrackLive.FormComponent, {:saved, food__track}}, socket)
   end
 
   @impl true

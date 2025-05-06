@@ -19,6 +19,22 @@ defmodule FoodTrackerWeb.Food_TrackLive.Show do
      |> assign(:food__track, Food_Tracking.get_food__track!(id, user_id))}
   end
 
+  @impl true
+  def handle_info({FoodTrackerWeb.Food_TrackLive.FormComponent, {:saved, food__track}}, socket) do
+    {:noreply,
+     socket
+     |> assign(:food__track, food__track)
+     |> put_flash(:info, "Food track updated successfully")}
+  end
+
+  @impl true
+  def handle_info(
+        {FoodTrackerWeb.Food_TrackLive.FormComponent_Extended, {:saved, food__track}},
+        socket
+      ) do
+    handle_info({FoodTrackerWeb.Food_TrackLive.FormComponent, {:saved, food__track}}, socket)
+  end
+
   defp page_title(:show), do: "Show Food  track"
   defp page_title(:edit), do: "Edit Food  track"
 
