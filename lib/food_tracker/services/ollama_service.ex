@@ -95,7 +95,6 @@ defmodule FoodTracker.Services.OllamaService do
   end
 
   defp process_response({:ok, response_text}, _) do
-    IO.puts("Response text: #{response_text}")
     processed_value = TextProcessing.extract_numbers(response_text)
 
     if processed_value == -1.0 do

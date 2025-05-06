@@ -83,10 +83,6 @@ defmodule FoodTracker.Services.GeminiService do
     else
       url = "#{gemini_url()}?key=#{api_key}"
 
-      Logger.debug(
-        "Making Gemini API request to: #{gemini_url()} with API key: #{String.slice(api_key, 0, 5)}..."
-      )
-
       # Build the request payload
       payload = %{
         contents: [
@@ -130,8 +126,6 @@ defmodule FoodTracker.Services.GeminiService do
   end
 
   defp process_response(body, _) do
-    IO.inspect(body, label: "Body")
-
     case Jason.decode(body) do
       {:ok, decoded} ->
         case decoded do

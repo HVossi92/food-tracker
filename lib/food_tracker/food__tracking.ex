@@ -22,8 +22,6 @@ defmodule FoodTracker.Food_Tracking do
 
   """
   def list_food_tracks(user_id) do
-    IO.puts("Listing food tracks for user: #{user_id}")
-
     # Early return with empty results if user_id is nil
     if is_nil(user_id) do
       []
@@ -38,8 +36,6 @@ defmodule FoodTracker.Food_Tracking do
   end
 
   def list_food_tracks_on(date, user_id) do
-    IO.puts("Listing food tracks for user: #{user_id} on date: #{date}")
-
     # Early return with empty results if user_id is nil
     if is_nil(user_id) do
       # Return an empty result set with the same structure
@@ -129,6 +125,10 @@ defmodule FoodTracker.Food_Tracking do
         # Process the nutrition info based on whether it was successful or not
         case nutrition_result do
           {:ok, nutrition_info} ->
+            IO.puts(
+              ">>>>>>>> GEMINI calories: #{nutrition_info.calories}, protein #{nutrition_info.protein}"
+            )
+
             attrs
             |> Map.put("calories", nutrition_info.calories)
             |> Map.put("protein", nutrition_info.protein)
@@ -142,7 +142,9 @@ defmodule FoodTracker.Food_Tracking do
 
             case ollama_result do
               {:ok, nutrition_info} ->
-                IO.inspect(nutrition_info, label: "Ollama nutrition information")
+                IO.puts(
+                  ">>>>>>>> OLLAMA calories: #{nutrition_info.calories}, protein #{nutrition_info.protein}"
+                )
 
                 attrs
                 |> Map.put("calories", nutrition_info.calories)

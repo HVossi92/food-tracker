@@ -14,8 +14,8 @@ Demo: https://munchmetrics.vossihub.org/
 [x] Implement anonymous user functionality
 [x] On refresh/load jump to today in the form date input
 [x] On refresh/load jump to current time in the form date input
-[ ] Display time in the user's timezone
 [x] Improve table layout (date, time)
+[ ] Display time in the user's timezone
 [ ] Edit calories & protein
 [ ] Fix settings layout
 [ ] Do not redirect for edit

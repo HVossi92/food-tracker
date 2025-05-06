@@ -11,8 +11,6 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
     today_ymd = Date.utc_today() |> Utils.date_to_ymd_string()
     current_time = DateTime.utc_now() |> DateTime.to_string() |> String.slice(11, 5)
     current_datetime = DateTime.utc_now()
-    IO.puts(current_datetime)
-    IO.puts(DateTime.to_time(current_datetime))
 
     # Get the user ID from either the current user or anonymous user
     user_id = get_user_id(socket)
