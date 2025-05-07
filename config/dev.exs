@@ -85,7 +85,9 @@ config :swoosh, :api_client, false
 config :food_tracker, env: :dev
 
 # Configure Ollama API for development environment
-config :food_tracker, :ollama_api, base_url: "http://localhost:11434/api"
+config :food_tracker, :ollama_api,
+  base_url: "http://localhost:11434/api",
+  model: "gemma3:1b"
 
 config :food_tracker, FoodTracker.Mailer,
   adapter: Swoosh.Adapters.SMTP,

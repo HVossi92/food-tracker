@@ -32,6 +32,10 @@ if config_env() == :prod do
     database: database_path,
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "5")
 
+  # Configure Ollama API model for production
+  ollama_model = System.get_env("OLLAMA_MODEL") || "gemma3:1b"
+  config :food_tracker, :ollama_api, model: ollama_model
+
   # Configure Gemini API for production
   gemini_api_key =
     System.get_env("GEMINI_API_KEY") ||

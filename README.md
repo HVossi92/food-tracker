@@ -20,6 +20,10 @@ Demo: https://munchmetrics.vossihub.org/
 [x] Do not redirect for edit
 [ ] Display time in the user's timezone
 [ ] Improve ai generated nutritional values
+[ ] Remove gemini
+[ ] Use qwen3:1.7b or gemma3:12b
+[ ] Make Ollama request async (create food track, update calories and protein)
+[ ] Improve Ollama performance, find better model and / or provide data
 
 ## For Users
 

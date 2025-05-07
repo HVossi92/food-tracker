@@ -80,10 +80,12 @@ defmodule FoodTracker.Services.OllamaService do
   defp ollama_request(system_prompt, prompt, unit, question) do
     # Get the configured base_url from application config
     base_url = Application.get_env(:food_tracker, :ollama_api)[:base_url]
+    # Get the model from config, which can be set via env vars in production
+    model = Application.get_env(:food_tracker, :ollama_api)[:model]
     client = Ollama.init(base_url)
 
     Ollama.completion(client,
-      model: "gemma3:1b",
+      model: model,
       system: system_prompt <> question <> " in #{unit}?",
       prompt: prompt,
       options: %{
