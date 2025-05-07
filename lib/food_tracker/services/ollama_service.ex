@@ -34,8 +34,8 @@ defmodule FoodTracker.Services.OllamaService do
       end)
 
     # Wait for tasks to complete with a 30-second timeout
-    calories_result = Task.await(calories_task, 32_000)
-    protein_result = Task.await(protein_task, 32_000)
+    calories_result = Task.await(calories_task, 512_000)
+    protein_result = Task.await(protein_task, 512_000)
 
     # Handle results based on whether they were successful or not
     case {calories_result, protein_result} do
@@ -81,9 +81,10 @@ defmodule FoodTracker.Services.OllamaService do
     # Get the model from config, which can be set via env vars in production
     model = Application.get_env(:food_tracker, :ollama_api)[:model]
     Logger.info("Getting nutrition info from Ollama for #{prompt} with model #{model}")
-    client = Ollama.init(base_url)
+    client = Ollama.init(base_url: base_url, receive_timeout: 512_000)
 
     Ollama.completion(client,
+      keep_alive: -1,
       model: model,
       system: system_prompt <> question <> " in #{unit}?",
       prompt: prompt,

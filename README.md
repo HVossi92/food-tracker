@@ -24,6 +24,7 @@ Demo: https://munchmetrics.vossihub.org/
 [ ] Use qwen3:1.7b or gemma3:12b
 [ ] Make Ollama request async (create food track, update calories and protein)
 [ ] Improve Ollama performance, find better model and / or provide data
+[ ] Tunnel into desktop pc to use gpu (if available), use server ollama as fallback
 
 ## For Users
 
