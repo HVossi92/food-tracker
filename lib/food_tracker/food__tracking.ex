@@ -4,6 +4,7 @@ defmodule FoodTracker.Food_Tracking do
   """
 
   import Ecto.Query, warn: false
+  require Logger
   alias FoodTracker.Repo
   alias FoodTracker.Food_Tracking.Food_Track
   alias FoodTracker.Services.OllamaService
@@ -119,45 +120,25 @@ defmodule FoodTracker.Food_Tracking do
         |> Map.put("calories", -1.0)
         |> Map.put("protein", -1.0)
       else
-        # Get nutrition information from APIs
-        nutrition_result = GeminiService.get_nutrition_info(attrs["name"])
+        ollama_result = OllamaService.get_nutrition_info(attrs["name"])
 
-        # Process the nutrition info based on whether it was successful or not
-        case nutrition_result do
+        case ollama_result do
           {:ok, nutrition_info} ->
-            IO.puts(
-              ">>>>>>>> GEMINI calories: #{nutrition_info.calories}, protein #{nutrition_info.protein}"
+            Logger.info(
+              ">>>>>>>> OLLAMA calories: #{nutrition_info.calories}, protein #{nutrition_info.protein}"
             )
 
             attrs
             |> Map.put("calories", nutrition_info.calories)
             |> Map.put("protein", nutrition_info.protein)
 
-          {:error, reason} ->
-            IO.puts("Error getting nutrition info from Gemini: #{reason}")
+          {:error, ollama_reason} ->
+            Logger.error("Error getting nutrition info from Ollama: #{ollama_reason}")
 
-            # Try Ollama as a fallback
-            IO.puts("Trying Ollama as a fallback...")
-            ollama_result = OllamaService.get_nutrition_info(attrs["name"])
-
-            case ollama_result do
-              {:ok, nutrition_info} ->
-                IO.puts(
-                  ">>>>>>>> OLLAMA calories: #{nutrition_info.calories}, protein #{nutrition_info.protein}"
-                )
-
-                attrs
-                |> Map.put("calories", nutrition_info.calories)
-                |> Map.put("protein", nutrition_info.protein)
-
-              {:error, ollama_reason} ->
-                IO.puts("Error getting nutrition info from Ollama: #{ollama_reason}")
-
-                # Both services failed, set default values
-                attrs
-                |> Map.put("calories", -1.0)
-                |> Map.put("protein", -1.0)
-            end
+            # Both services failed, set default values
+            attrs
+            |> Map.put("calories", -1.0)
+            |> Map.put("protein", -1.0)
         end
       end
 

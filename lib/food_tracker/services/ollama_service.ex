@@ -13,8 +13,6 @@ defmodule FoodTracker.Services.OllamaService do
 
   @impl true
   def get_nutrition_info(food_item) do
-    Logger.info("Fetching nutrition info from Ollama for: #{food_item}")
-
     calories_task =
       Task.async(fn ->
         ollama_request(
@@ -82,6 +80,7 @@ defmodule FoodTracker.Services.OllamaService do
     base_url = Application.get_env(:food_tracker, :ollama_api)[:base_url]
     # Get the model from config, which can be set via env vars in production
     model = Application.get_env(:food_tracker, :ollama_api)[:model]
+    Logger.info("Getting nutrition info from Ollama for #{prompt} with model #{model}")
     client = Ollama.init(base_url)
 
     Ollama.completion(client,
