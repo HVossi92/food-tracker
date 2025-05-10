@@ -84,7 +84,6 @@ defmodule FoodTracker.Services.OllamaService do
     client = Ollama.init(base_url: base_url, receive_timeout: 512_000)
 
     Ollama.completion(client,
-      keep_alive: -1,
       model: model,
       system: system_prompt <> question <> " in #{unit}?",
       prompt: prompt,
