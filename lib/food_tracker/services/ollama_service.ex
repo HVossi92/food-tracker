@@ -60,6 +60,8 @@ defmodule FoodTracker.Services.OllamaService do
   end
 
   defp extract_response(response) do
+    IO.inspect(response)
+
     case response do
       {:ok, %{"response" => response_text, "done" => true}} ->
         {:ok, String.trim(response_text)}
@@ -77,17 +79,16 @@ defmodule FoodTracker.Services.OllamaService do
 
   defp ollama_request(system_prompt, prompt, unit, question) do
     # Get the configured base_url from application config
-    base_url = Application.get_env(:food_tracker, :ollama_api)[:base_url]
-    IO.puts("Base URL: #{base_url}")
+    # base_url = Application.get_env(:food_tracker, :ollama_api)[:base_url]
+    base_url = "http://100.93.118.103:11434/api"
+    IO.puts(">>>> Base URL: #{base_url}")
     # Get the model from config, which can be set via env vars in production
-    model = Application.get_env(:food_tracker, :ollama_api)[:model]
-    Logger.info("Getting nutrition info from Ollama for #{prompt} with model #{model}")
+    # model = Application.get_env(:food_tracker, :ollama_api)[:model]
+    # Logger.info("Getting nutrition info from Ollama for #{prompt} with model #{model}")
     client = Ollama.init(base_url: base_url, receive_timeout: 512_000)
 
-    IO.puts("Client: #{inspect(client)}")
-
     Ollama.completion(client,
-      model: model,
+      model: "qwen3:8b",
       system: system_prompt <> question <> " in #{unit}?",
       prompt: prompt,
       options: %{

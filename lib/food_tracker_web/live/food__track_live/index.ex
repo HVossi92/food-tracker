@@ -33,10 +33,6 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
       |> assign(:todays_usage, todays_usage)
       |> assign(:daily_limit, daily_limit)
       |> assign(:remaining_entries, remaining_entries)
-      |> assign(
-        :high_demand_warning,
-        "We are experiencing higher demand than usual. AI responses might be significantly slower and of lower accuracy."
-      )
 
     # Pattern match the return value to get food_tracks, calories, and protein
     %{food_tracks: food_tracks, calories: total_calories, protein: total_protein} =
@@ -66,10 +62,6 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
       |> assign(:todays_usage, todays_usage)
       |> assign(:daily_limit, daily_limit)
       |> assign(:remaining_entries, remaining_entries)
-      |> assign(
-        :high_demand_warning,
-        "We are experiencing higher demand than usual. AI responses might be significantly slower and of lower accuracy."
-      )
 
     socket =
       case params do
@@ -175,10 +167,6 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
       |> assign(:remaining_entries, remaining_entries)
       |> assign(:total_calories, total_calories)
       |> assign(:total_protein, total_protein)
-      |> assign(
-        :high_demand_warning,
-        "We are experiencing higher demand than usual. AI responses might be significantly slower and of lower accuracy."
-      )
       |> stream(:food_tracks, [], reset: true)
       |> stream(:food_tracks, food_tracks)
 
@@ -240,10 +228,6 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
       |> assign(:remaining_entries, remaining_entries)
       |> assign(:total_calories, total_calories)
       |> assign(:total_protein, total_protein)
-      |> assign(
-        :high_demand_warning,
-        "We are experiencing higher demand than usual. AI responses might be significantly slower and of lower accuracy."
-      )
       |> stream_delete(:food_tracks, food__track)
 
     {:noreply, socket}
@@ -266,10 +250,6 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
       |> assign(:food__track, %FoodTracker.Food_Tracking.Food_Track{date: new_date_string})
       |> assign(:total_calories, total_calories)
       |> assign(:total_protein, total_protein)
-      |> assign(
-        :high_demand_warning,
-        "We are experiencing higher demand than usual. AI responses might be significantly slower and of lower accuracy."
-      )
       |> stream(:food_tracks, [], reset: true)
       |> stream(:food_tracks, food_tracks)
 
@@ -291,10 +271,6 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
       |> assign(:food__track, %FoodTracker.Food_Tracking.Food_Track{date: new_date_string})
       |> assign(:total_calories, total_calories)
       |> assign(:total_protein, total_protein)
-      |> assign(
-        :high_demand_warning,
-        "We are experiencing higher demand than usual. AI responses might be significantly slower and of lower accuracy."
-      )
       |> stream(:food_tracks, [], reset: true)
       |> stream(:food_tracks, food_tracks)
 
@@ -318,10 +294,6 @@ defmodule FoodTrackerWeb.Food_TrackLive.Index do
       |> assign(:food__track, %FoodTracker.Food_Tracking.Food_Track{date: new_date_string})
       |> assign(:total_calories, total_calories)
       |> assign(:total_protein, total_protein)
-      |> assign(
-        :high_demand_warning,
-        "We are experiencing higher demand than usual. AI responses might be significantly slower and of lower accuracy."
-      )
       |> stream(:food_tracks, [], reset: true)
       |> stream(:food_tracks, food_tracks)
 
