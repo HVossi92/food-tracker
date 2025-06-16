@@ -68,7 +68,7 @@ config :food_tracker, :gemini_api,
   api_key: System.get_env("GEMINI_API_KEY") || nil
 
 # Configure Ollama API
-config :food_tracker, :ollama_api, base_url: "http://localhost:11434/api"
+config :food_tracker, :ollama_api, base_url: "http://100.93.118.103:11434/api"
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
