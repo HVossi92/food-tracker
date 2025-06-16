@@ -33,7 +33,7 @@ if config_env() == :prod do
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "5")
 
   # Configure Ollama API model for production
-  ollama_model = System.get_env("OLLAMA_MODEL") || "gemma3:1b"
+  ollama_model = System.get_env("OLLAMA_MODEL") || "qwen3:8b"
   config :food_tracker, :ollama_api, model: ollama_model
 
   # Configure Gemini API for production
